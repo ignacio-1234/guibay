@@ -14,9 +14,9 @@
     "db:seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
-    "next": "^14.2.5",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
+    "next": "^15.1.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
     "next-auth": "^5.0.0-beta.19",
     "@auth/prisma-adapter": "^2.4.1",
     "@prisma/client": "^5.17.0",
@@ -53,14 +53,14 @@
   "devDependencies": {
     "typescript": "^5.5.4",
     "@types/node": "^20.14.14",
-    "@types/react": "^18.3.3",
-    "@types/react-dom": "^18.3.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
     "@types/bcryptjs": "^2.4.6",
     "tailwindcss": "^3.4.7",
     "autoprefixer": "^10.4.19",
     "postcss": "^8.4.40",
     "eslint": "^8.57.0",
-    "eslint-config-next": "^14.2.5",
+    "eslint-config-next": "^15.1.0",
     "tsx": "^4.16.2",
     "prettier": "^3.3.3",
     "prettier-plugin-tailwindcss": "^0.6.5"
