@@ -3,14 +3,15 @@ import { db } from "@/lib/db";
 import type { Metadata } from "next";
 
 interface Props {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
 // ISR: revalidar cada 60 segundos
 export const revalidate = 60;
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const microsite = await getMicrosite(params.slug);
+  const { slug } = await params;
+  const microsite = await getMicrosite(slug);
 
   if (!microsite) {
     return { title: "Sitio no encontrado" };
@@ -42,7 +43,8 @@ async function getMicrosite(slug: string) {
 }
 
 export default async function MicrositePage({ params }: Props) {
-  const microsite = await getMicrosite(params.slug);
+  const { slug } = await params;
+  const microsite = await getMicrosite(slug);
 
   if (!microsite) notFound();
 

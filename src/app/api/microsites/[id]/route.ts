@@ -4,19 +4,20 @@ import { db } from "@/lib/db";
 import { updateMicrositeSchema } from "@/lib/validations/microsite";
 
 interface Params {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 // GET /api/microsites/:id
 export async function GET(_req: Request, { params }: Params) {
   try {
+    const { id } = await params;
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const microsite = await db.microsite.findUnique({
-      where: { id: params.id, userId: session.user.id },
+      where: { id, userId: session.user.id },
       include: {
         template: true,
         sections: { orderBy: { order: "asc" } },
@@ -38,6 +39,7 @@ export async function GET(_req: Request, { params }: Params) {
 // PATCH /api/microsites/:id
 export async function PATCH(req: Request, { params }: Params) {
   try {
+    const { id } = await params;
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -54,7 +56,7 @@ export async function PATCH(req: Request, { params }: Params) {
     }
 
     const microsite = await db.microsite.update({
-      where: { id: params.id, userId: session.user.id },
+      where: { id, userId: session.user.id },
       data: validated.data,
     });
 
@@ -68,13 +70,14 @@ export async function PATCH(req: Request, { params }: Params) {
 // DELETE /api/microsites/:id
 export async function DELETE(_req: Request, { params }: Params) {
   try {
+    const { id } = await params;
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     await db.microsite.delete({
-      where: { id: params.id, userId: session.user.id },
+      where: { id, userId: session.user.id },
     });
 
     return NextResponse.json({ message: "Eliminado" });
