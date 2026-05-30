@@ -6,8 +6,8 @@ interface Props {
   params: Promise<{ slug: string }>;
 }
 
-// ISR: revalidar cada 60 segundos
-export const revalidate = 60;
+// El MVP debe reflejar publicar/despublicar de inmediato.
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
@@ -31,7 +31,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 async function getMicrosite(slug: string) {
-  return db.microsite.findUnique({
+  return db.microsite.findFirst({
     where: { slug, published: true },
     include: {
       template: true,

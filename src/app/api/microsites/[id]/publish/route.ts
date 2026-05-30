@@ -17,8 +17,17 @@ export async function POST(req: Request, { params }: Params) {
 
     const { published } = await req.json();
 
-    const microsite = await db.microsite.update({
+    const existing = await db.microsite.findFirst({
       where: { id, userId: session.user.id },
+      select: { id: true },
+    });
+
+    if (!existing) {
+      return NextResponse.json({ error: "No encontrado" }, { status: 404 });
+    }
+
+    const microsite = await db.microsite.update({
+      where: { id: existing.id },
       data: {
         published: Boolean(published),
         publishedAt: published ? new Date() : null,

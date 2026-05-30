@@ -6,7 +6,13 @@ import { auth } from "@/lib/auth";
 export async function GET() {
   try {
     const session = await auth();
-    const userPlan = session?.user ? "FREE" : "FREE"; // TODO: obtener plan real del usuario
+    const subscription = session?.user?.id
+      ? await db.subscription.findUnique({
+          where: { userId: session.user.id },
+          include: { plan: true },
+        })
+      : null;
+    const userPlan = subscription?.plan.name ?? "FREE";
 
     const templates = await db.template.findMany({
       where: { isActive: true },

@@ -16,7 +16,7 @@ export async function GET(_req: Request, { params }: Params) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const microsite = await db.microsite.findUnique({
+    const microsite = await db.microsite.findFirst({
       where: { id, userId: session.user.id },
       include: {
         template: true,
@@ -55,8 +55,17 @@ export async function PATCH(req: Request, { params }: Params) {
       );
     }
 
-    const microsite = await db.microsite.update({
+    const existing = await db.microsite.findFirst({
       where: { id, userId: session.user.id },
+      select: { id: true },
+    });
+
+    if (!existing) {
+      return NextResponse.json({ error: "No encontrado" }, { status: 404 });
+    }
+
+    const microsite = await db.microsite.update({
+      where: { id: existing.id },
       data: validated.data,
     });
 
@@ -76,8 +85,17 @@ export async function DELETE(_req: Request, { params }: Params) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    await db.microsite.delete({
+    const existing = await db.microsite.findFirst({
       where: { id, userId: session.user.id },
+      select: { id: true },
+    });
+
+    if (!existing) {
+      return NextResponse.json({ error: "No encontrado" }, { status: 404 });
+    }
+
+    await db.microsite.delete({
+      where: { id: existing.id },
     });
 
     return NextResponse.json({ message: "Eliminado" });

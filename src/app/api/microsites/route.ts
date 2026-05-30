@@ -60,6 +60,19 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Plantilla no encontrada" }, { status: 404 });
     }
 
+    const subscription = await db.subscription.findUnique({
+      where: { userId: session.user.id },
+      include: { plan: true },
+    });
+    const userPlan = subscription?.plan.name ?? "FREE";
+
+    if (template.tier === "PRO" && userPlan === "FREE") {
+      return NextResponse.json(
+        { error: "Esta plantilla requiere el plan Pro" },
+        { status: 403 }
+      );
+    }
+
     // Crear micrositio con secciones por defecto
     const microsite = await db.microsite.create({
       data: {
