@@ -4,6 +4,13 @@
 
 ## Avance implementado el 2026-05-30
 
+- Diagnostico produccion 2026-05-30:
+  - Vercel proyecto `prueba-emilios-projects/guibay` esta enlazado y el deploy actual esta `READY`.
+  - Vercel CLI reporta: `No Environment Variables found for prueba-emilios-projects/guibay`.
+  - Supabase `Kutplix` responde y tiene `User = 0`, `Plan = 2`, `Subscription = 0`.
+  - El registro falla en produccion porque falta configurar variables minimas de entorno en Vercel, especialmente `DATABASE_URL`.
+  - Se agrego un guard en `POST /api/auth/register` para devolver error claro si falta `DATABASE_URL`.
+
 - Registro funcional: `/register` llama `POST /api/auth/register` y luego inicia sesión con Credentials.
 - Login funcional: `/login` usa NextAuth Credentials y Google OAuth cuando las variables de Google están configuradas.
 - Creación de micrositio: `/dashboard/new` lista templates, valida slug y crea el micrositio.

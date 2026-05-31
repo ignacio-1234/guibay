@@ -3,9 +3,26 @@ import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
 import { registerSchema } from "@/lib/validations/auth";
 
+export const runtime = "nodejs";
+
+function hasDatabaseConfig() {
+  return Boolean(process.env.DATABASE_URL);
+}
+
 // POST /api/auth/register
 export async function POST(req: Request) {
   try {
+    if (!hasDatabaseConfig()) {
+      console.error("[POST /api/auth/register] Missing DATABASE_URL");
+      return NextResponse.json(
+        {
+          error:
+            "Falta configurar la base de datos en Vercel. Agrega DATABASE_URL y vuelve a desplegar.",
+        },
+        { status: 503 }
+      );
+    }
+
     const body = await req.json();
     const validated = registerSchema.safeParse(body);
 

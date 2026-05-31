@@ -14,6 +14,12 @@
 
 ## Prioridad alta
 
+0. Configurar variables en Vercel para desbloquear registro
+   - Vercel CLI confirmo `No Environment Variables found for prueba-emilios-projects/guibay`.
+   - Agregar en Production, Preview y Development: `DATABASE_URL`, `DIRECT_URL`, `NEXTAUTH_SECRET`, `NEXTAUTH_URL`, `NEXT_PUBLIC_APP_URL`.
+   - Redeploy despues de guardar las variables.
+   - Reprobar `/register` con una cuenta de prueba.
+
 1. Verificar proyecto local
    - Ejecutar instalación si falta `node_modules`.
    - Ejecutar `pnpm db:generate`.

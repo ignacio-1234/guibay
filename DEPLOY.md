@@ -6,6 +6,9 @@
 - [x] 12 tablas creadas en PostgreSQL 17.6
 - [x] 2 planes insertados (Free / Pro)
 - [x] 6 plantillas insertadas (4 Free + 2 Pro)
+
+Nota 2026-05-30: Vercel CLI reporto `No Environment Variables found for prueba-emilios-projects/guibay`.
+El registro en produccion no funcionara hasta agregar las variables minimas del Paso 5 y redeployar.
 - [ ] Variables de entorno configuradas
 - [ ] Código en GitHub
 - [ ] Proyecto en Vercel
