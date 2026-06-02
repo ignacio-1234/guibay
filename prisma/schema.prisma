@@ -241,6 +241,7 @@ enum SectionType {
   CONTACT     // email, teléfono, formulario de contacto
   TEXT        // bloque de texto libre
   VIDEO       // embed de YouTube/Vimeo
+  SERVICES    // lista de servicios con ícono y descripción
 }
 
 // ─────────────────────────────────────────────

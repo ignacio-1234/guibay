@@ -77,6 +77,12 @@ export default async function MicrositePage({ params }: Props) {
   const links = microsite.sections.find((s) => s.type === "LINKS")?.data as {
     buttons?: { id: string; label: string; url: string; color?: string }[];
   } | null;
+  const servicesData = microsite.sections.find((s) => s.type === "SERVICES")?.data as {
+    heading?: string; items?: { id: string; title: string; description?: string; icon?: string }[];
+  } | null;
+  const contactData = microsite.sections.find((s) => s.type === "CONTACT")?.data as {
+    phone?: string; whatsapp?: string; email?: string; address?: string; hours?: string;
+  } | null;
 
   const { colors, layout } = config;
   const templateSlug = microsite.template?.slug ?? "clasico";
@@ -177,6 +183,8 @@ export default async function MicrositePage({ params }: Props) {
             </div>
           )}
 
+          <ServicesBlock data={servicesData} colors={colors} />
+          <ContactBlock data={contactData} colors={colors} />
           <PoweredBy color={colors.text} />
         </div>
       )}
@@ -238,6 +246,8 @@ export default async function MicrositePage({ params }: Props) {
                 ))}
               </div>
             )}
+            <ServicesBlock data={servicesData} colors={colors} />
+            <ContactBlock data={contactData} colors={colors} />
             <PoweredBy color={colors.text} />
           </div>
         </div>
@@ -301,6 +311,8 @@ export default async function MicrositePage({ params }: Props) {
                 ))}
               </div>
             )}
+            <ServicesBlock data={servicesData} colors={colors} />
+            <ContactBlock data={contactData} colors={colors} />
             <PoweredBy color={colors.primary} />
           </div>
         </div>
@@ -362,11 +374,73 @@ export default async function MicrositePage({ params }: Props) {
                   ))}
                 </div>
               )}
+              <ServicesBlock data={servicesData} colors={colors} />
+              <ContactBlock data={contactData} colors={colors} />
               <PoweredBy color={colors.text} />
             </div>
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+type Colors = { background: string; primary: string; accent: string; text: string };
+
+function ServicesBlock({ data, colors }: { data: { heading?: string; items?: { id: string; title: string; description?: string; icon?: string }[] } | null; colors: Colors }) {
+  if (!data?.items || data.items.length === 0) return null;
+  return (
+    <div style={{ marginTop: 32, paddingTop: 24, borderTop: `1px solid ${colors.primary}18` }}>
+      <h2 style={{ fontSize: 14, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1, color: colors.primary, opacity: 0.6, margin: "0 0 16px", textAlign: "center" }}>
+        {data.heading ?? "Servicios"}
+      </h2>
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        {data.items.map((item) => (
+          <div key={item.id} style={{ display: "flex", alignItems: "flex-start", gap: 12, background: `${colors.primary}08`, borderRadius: 14, padding: "12px 14px" }}>
+            <span style={{ fontSize: 22, lineHeight: 1, flexShrink: 0 }}>{item.icon ?? "⭐"}</span>
+            <div>
+              <p style={{ margin: 0, fontWeight: 600, fontSize: 14, color: colors.primary }}>{item.title}</p>
+              {item.description && <p style={{ margin: "3px 0 0", fontSize: 12, color: colors.text, opacity: 0.7, lineHeight: 1.5 }}>{item.description}</p>}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ContactBlock({ data, colors }: { data: { phone?: string; whatsapp?: string; email?: string; address?: string; hours?: string } | null; colors: Colors }) {
+  if (!data) return null;
+  const items = [
+    data.whatsapp && { icon: "💬", label: "WhatsApp", value: data.whatsapp, href: `https://wa.me/${data.whatsapp.replace(/\D/g, "")}` },
+    data.phone && { icon: "📞", label: "Teléfono", value: data.phone, href: `tel:${data.phone.replace(/\s/g, "")}` },
+    data.email && { icon: "✉️", label: "Email", value: data.email, href: `mailto:${data.email}` },
+    data.address && { icon: "📍", label: "Dirección", value: data.address, href: null },
+    data.hours && { icon: "🕐", label: "Horario", value: data.hours, href: null },
+  ].filter(Boolean) as { icon: string; label: string; value: string; href: string | null }[];
+
+  if (items.length === 0) return null;
+  return (
+    <div style={{ marginTop: 24, paddingTop: 24, borderTop: `1px solid ${colors.primary}18` }}>
+      <h2 style={{ fontSize: 14, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1, color: colors.primary, opacity: 0.6, margin: "0 0 16px", textAlign: "center" }}>
+        Contacto
+      </h2>
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        {items.map((item) => {
+          const inner = (
+            <div style={{ display: "flex", alignItems: "center", gap: 10, background: `${colors.primary}08`, borderRadius: 12, padding: "10px 14px" }}>
+              <span style={{ fontSize: 18 }}>{item.icon}</span>
+              <div>
+                <p style={{ margin: 0, fontSize: 11, color: colors.text, opacity: 0.5, fontWeight: 500 }}>{item.label}</p>
+                <p style={{ margin: 0, fontSize: 13, color: colors.primary, fontWeight: 600 }}>{item.value}</p>
+              </div>
+            </div>
+          );
+          return item.href
+            ? <a key={item.label} href={item.href} target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none" }}>{inner}</a>
+            : <div key={item.label}>{inner}</div>;
+        })}
+      </div>
     </div>
   );
 }

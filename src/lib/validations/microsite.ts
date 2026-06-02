@@ -58,6 +58,30 @@ export const updateMicrositeSectionsSchema = z.object({
       )
       .max(12),
   }),
+  services: z
+    .object({
+      heading: z.string().max(60).optional().default("Nuestros Servicios"),
+      items: z
+        .array(
+          z.object({
+            id: z.string().min(1),
+            title: z.string().min(1).max(60),
+            description: z.string().max(200).optional().default(""),
+            icon: z.string().max(8).optional().default("⭐"),
+          })
+        )
+        .max(20),
+    })
+    .optional(),
+  contact: z
+    .object({
+      phone: z.string().max(30).optional().default(""),
+      whatsapp: z.string().max(30).optional().default(""),
+      email: z.string().email().optional().or(z.literal("")).optional(),
+      address: z.string().max(200).optional().default(""),
+      hours: z.string().max(100).optional().default(""),
+    })
+    .optional(),
 });
 
 export type CreateMicrositeInput = z.infer<typeof createMicrositeSchema>;

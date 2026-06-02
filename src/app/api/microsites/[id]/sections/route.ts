@@ -40,42 +40,20 @@ export async function PATCH(req: Request, { params }: Params) {
       );
     }
 
-    const { profile, social, links } = validated.data;
-    const sections = [
-      {
-        type: "PROFILE" as const,
-        order: 0,
-        data: {
-          name: profile.name,
-          bio: profile.bio ?? "",
-          avatarUrl: cleanUrl(profile.avatarUrl),
-          heroUrl: cleanUrl(profile.heroUrl),
-        },
-      },
-      {
-        type: "SOCIAL" as const,
-        order: 1,
-        data: {
-          networks: social.networks.map((network) => ({
-            ...network,
-            label: network.label?.trim() || network.network,
-          })),
-        },
-      },
-      {
-        type: "LINKS" as const,
-        order: 2,
-        data: {
-          buttons: links.buttons.map((button) => ({
-            ...button,
-            color: button.color ?? "#2D1B69",
-          })),
-        },
-      },
+    const { profile, social, links, services, contact } = validated.data;
+
+    type SType = "PROFILE" | "SOCIAL" | "LINKS" | "SERVICES" | "CONTACT";
+    const sections: { type: SType; order: number; data: object }[] = [
+      { type: "PROFILE", order: 0, data: { name: profile.name, bio: profile.bio ?? "", avatarUrl: cleanUrl(profile.avatarUrl), heroUrl: cleanUrl(profile.heroUrl) } },
+      { type: "SOCIAL", order: 1, data: { networks: social.networks.map((n) => ({ ...n, label: n.label?.trim() || n.network })) } },
+      { type: "LINKS", order: 2, data: { buttons: links.buttons.map((b) => ({ ...b, color: b.color ?? "#2D1B69" })) } },
     ];
 
+    if (services) sections.push({ type: "SERVICES", order: 3, data: services });
+    if (contact) sections.push({ type: "CONTACT", order: 4, data: contact });
+
     const existingSections = await db.section.findMany({
-      where: { micrositeId: microsite.id, type: { in: ["PROFILE", "SOCIAL", "LINKS"] } },
+      where: { micrositeId: microsite.id, type: { in: sections.map((s) => s.type) } },
     });
 
     await db.$transaction(
