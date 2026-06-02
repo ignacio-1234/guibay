@@ -77,11 +77,14 @@ git push -u origin main
 
 | Key | Valor |
 |-----|-------|
-| `DATABASE_URL` | `postgresql://postgres:[PASSWORD]@db.kcltmubdckqvdxetqaby.supabase.co:6543/postgres?pgbouncer=true` |
-| `DIRECT_URL` | `postgresql://postgres:[PASSWORD]@db.kcltmubdckqvdxetqaby.supabase.co:5432/postgres` |
+| `DATABASE_URL` | `postgresql://postgres.kcltmubdckqvdxetqaby:[PASSWORD_URL_ENCODED]@aws-0-us-east-2.pooler.supabase.com:6543/postgres?pgbouncer=true` |
+| `DIRECT_URL` | `postgresql://postgres:[PASSWORD_URL_ENCODED]@db.kcltmubdckqvdxetqaby.supabase.co:5432/postgres` |
 | `NEXTAUTH_SECRET` | tu secret generado en el Paso 2 |
 | `NEXTAUTH_URL` | `https://TU-PROYECTO.vercel.app` |
 | `NEXT_PUBLIC_APP_URL` | `https://TU-PROYECTO.vercel.app` |
+
+> Importante: si el password contiene caracteres especiales como `#`, `@`, `%`, `/` o `?`, deben ir codificados para URL. Por ejemplo, `#` se escribe `%23`.
+> `DATABASE_URL` debe usar el host del pooler de Supabase (`*.pooler.supabase.com`) con usuario `postgres.kcltmubdckqvdxetqaby`, no `db.kcltmubdckqvdxetqaby.supabase.co:6543`.
 
 5. Click **Deploy** → Vercel hace el build automático
 

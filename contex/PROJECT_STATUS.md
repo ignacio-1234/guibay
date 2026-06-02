@@ -10,6 +10,10 @@
   - Supabase `Kutplix` responde y tiene `User = 0`, `Plan = 2`, `Subscription = 0`.
   - El registro falla en produccion porque falta configurar variables minimas de entorno en Vercel, especialmente `DATABASE_URL`.
   - Se agrego un guard en `POST /api/auth/register` para devolver error claro si falta `DATABASE_URL`.
+- Diagnostico produccion 2026-06-02:
+  - `DATABASE_URL` ya existe en Vercel, pero los logs muestran `Can't reach database server at db.kcltmubdckqvdxetqaby.supabase.co:6543`.
+  - La variable debe usar el pooler de Supabase: `postgresql://postgres.kcltmubdckqvdxetqaby:[PASSWORD_URL_ENCODED]@aws-0-us-east-2.pooler.supabase.com:6543/postgres?pgbouncer=true`.
+  - `DIRECT_URL` debe quedar como conexion directa: `postgresql://postgres:[PASSWORD_URL_ENCODED]@db.kcltmubdckqvdxetqaby.supabase.co:5432/postgres`.
 
 - Registro funcional: `/register` llama `POST /api/auth/register` y luego inicia sesión con Credentials.
 - Login funcional: `/login` usa NextAuth Credentials y Google OAuth cuando las variables de Google están configuradas.
