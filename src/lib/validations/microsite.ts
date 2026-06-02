@@ -9,7 +9,7 @@ export const createMicrositeSchema = z.object({
     .min(3, "El slug debe tener al menos 3 caracteres")
     .max(40)
     .regex(/^[a-z0-9-]+$/, "Solo letras minúsculas, números y guiones"),
-  templateId: z.string().cuid("Plantilla inválida"),
+  templateId: z.string().min(1, "Plantilla inválida"),
   category: z.string().optional(),
   description: z.string().max(160).optional(),
 });
