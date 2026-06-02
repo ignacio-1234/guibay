@@ -1,17 +1,13 @@
-import { getToken } from "next-auth/jwt";
-import { NextResponse, type NextRequest } from "next/server";
+import { auth } from "@/lib/auth";
+import { NextResponse } from "next/server";
 
 const AUTH_ROUTES = ["/login", "/register"];
 const PROTECTED_PREFIX = ["/dashboard", "/editor", "/settings"];
 
-export default async function middleware(req: NextRequest) {
+export default auth((req) => {
   const { nextUrl } = req;
   const path = nextUrl.pathname;
-  const token = await getToken({
-    req,
-    secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
-  });
-  const isLoggedIn = !!token;
+  const isLoggedIn = !!req.auth;
 
   const isAuthRoute = AUTH_ROUTES.includes(path);
   const isProtectedRoute = PROTECTED_PREFIX.some((prefix) => path.startsWith(prefix));
@@ -35,7 +31,7 @@ export default async function middleware(req: NextRequest) {
   }
 
   return NextResponse.next();
-}
+});
 
 export const config = {
   matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)"],
