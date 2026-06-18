@@ -191,6 +191,54 @@ async function main() {
         },
       },
     }),
+    prisma.template.upsert({
+      where: { slug: "brutalista" },
+      update: {},
+      create: {
+        name: "Brutalista",
+        slug: "brutalista",
+        description: "Bordes gruesos, sin rodeos. Diseño que se hace notar",
+        category: "creative",
+        tier: TemplateTier.PRO,
+        config: {
+          colors: {
+            background: "#FFFFFF",
+            primary: "#000000",
+            accent: "#FF3300",
+            text: "#111111",
+          },
+          fonts: {
+            heading: "Inter",
+            body: "Inter",
+          },
+          layout: "brutal",
+        },
+      },
+    }),
+    prisma.template.upsert({
+      where: { slug: "minimalista" },
+      update: {},
+      create: {
+        name: "Minimalista",
+        slug: "minimalista",
+        description: "Espacio en blanco, tipografía fina. Menos es más",
+        category: "minimal",
+        tier: TemplateTier.PRO,
+        config: {
+          colors: {
+            background: "#F9F9F8",
+            primary: "#111111",
+            accent: "#555555",
+            text: "#333333",
+          },
+          fonts: {
+            heading: "Inter",
+            body: "Inter",
+          },
+          layout: "minimal",
+        },
+      },
+    }),
   ]);
 
   console.log(`✅ Templates: ${templates.length} creados`);

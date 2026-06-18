@@ -41,7 +41,7 @@ async function getMicrosite(slug: string) {
 type TemplateConfig = {
   colors: { background: string; primary: string; accent: string; text: string };
   fonts: { heading: string; body: string };
-  layout: "centered" | "full-width" | "card";
+  layout: "centered" | "full-width" | "card" | "brutal" | "minimal";
 };
 
 const DEFAULT_CONFIG: TemplateConfig = {
@@ -91,6 +91,142 @@ export default async function MicrositePage({ params }: Props) {
     <div
       style={{ minHeight: "100vh", background: colors.background, color: colors.text, fontFamily: "Inter, system-ui, sans-serif" }}
     >
+      {/* ── BRUTALISTA ────────────────────────────────────────── */}
+      {layout === "brutal" && (
+        <div style={{ maxWidth: 420, margin: "0 auto", padding: "40px 20px 80px" }}>
+          {/* Header box */}
+          <div style={{
+            border: "3px solid #000",
+            padding: "28px 24px 24px",
+            marginBottom: 24,
+            background: colors.background,
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 20, marginBottom: 16 }}>
+              {profile?.avatarUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={profile.avatarUrl} alt={profile.name ?? microsite.title}
+                  style={{ width: 80, height: 80, objectFit: "cover", flexShrink: 0, border: "3px solid #000" }}
+                />
+              ) : (
+                <div style={{ width: 80, height: 80, background: "#000", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 32, fontWeight: 900, color: "#fff" }}>
+                  {(profile?.name ?? microsite.title)[0].toUpperCase()}
+                </div>
+              )}
+              <div>
+                <h1 style={{ fontSize: 22, fontWeight: 900, color: "#000", margin: "0 0 4px", lineHeight: 1.1 }}>
+                  {profile?.name ?? microsite.title}
+                </h1>
+                {profile?.bio && (
+                  <p style={{ fontSize: 13, color: "#444", lineHeight: 1.5, margin: 0 }}>{profile.bio}</p>
+                )}
+              </div>
+            </div>
+            {socials?.networks && socials.networks.length > 0 && (
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap", borderTop: "2px solid #000", paddingTop: 14 }}>
+                {socials.networks.map((sn) => (
+                  <a key={sn.id} href={sn.url} target="_blank" rel="noopener noreferrer"
+                    style={{
+                      padding: "6px 12px", border: "2px solid #000", fontWeight: 700, fontSize: 12,
+                      color: "#000", textDecoration: "none", background: "transparent",
+                    }}
+                    title={sn.network}
+                  >
+                    {sn.label ?? sn.network}
+                  </a>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Link buttons */}
+          {links?.buttons && links.buttons.length > 0 && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+              {links.buttons.map((btn, i) => (
+                <a key={btn.id} href={btn.url} target="_blank" rel="noopener noreferrer"
+                  style={{
+                    display: "block", textAlign: "center",
+                    padding: "16px 20px",
+                    border: "3px solid #000",
+                    borderTop: i === 0 ? "3px solid #000" : "0px",
+                    background: i % 2 === 0 ? "#000" : "#fff",
+                    color: i % 2 === 0 ? "#fff" : "#000",
+                    fontWeight: 900, fontSize: 15,
+                    textDecoration: "none",
+                  }}
+                >
+                  {btn.label}
+                </a>
+              ))}
+            </div>
+          )}
+
+          <BrutalServicesBlock data={servicesData} />
+          <BrutalContactBlock data={contactData} />
+          <PoweredBy color={colors.text} />
+        </div>
+      )}
+
+      {/* ── MINIMALISTA ───────────────────────────────────────── */}
+      {layout === "minimal" && (
+        <div style={{ maxWidth: 440, margin: "0 auto", padding: "64px 28px 80px" }}>
+          <div style={{ marginBottom: 48 }}>
+            {profile?.avatarUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={profile.avatarUrl} alt={profile.name ?? microsite.title}
+                style={{ width: 72, height: 72, borderRadius: "50%", objectFit: "cover", border: `1px solid ${colors.primary}30`, marginBottom: 20, display: "block" }}
+              />
+            ) : (
+              <div style={{ width: 72, height: 72, borderRadius: "50%", background: `${colors.primary}12`, marginBottom: 20, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28, fontWeight: 700, color: colors.primary, border: `1px solid ${colors.primary}25` }}>
+                {(profile?.name ?? microsite.title)[0].toUpperCase()}
+              </div>
+            )}
+            <h1 style={{ fontSize: 24, fontWeight: 700, color: colors.primary, margin: "0 0 10px", letterSpacing: -0.5 }}>
+              {profile?.name ?? microsite.title}
+            </h1>
+            {profile?.bio && (
+              <p style={{ fontSize: 15, color: colors.text, opacity: 0.65, lineHeight: 1.65, margin: 0, maxWidth: 340 }}>{profile.bio}</p>
+            )}
+          </div>
+
+          {/* Socials as text links */}
+          {socials?.networks && socials.networks.length > 0 && (
+            <div style={{ display: "flex", gap: 20, flexWrap: "wrap", marginBottom: 40, borderBottom: `1px solid ${colors.primary}15`, paddingBottom: 32 }}>
+              {socials.networks.map((sn) => (
+                <a key={sn.id} href={sn.url} target="_blank" rel="noopener noreferrer"
+                  style={{ fontSize: 13, color: colors.primary, textDecoration: "none", fontWeight: 500, opacity: 0.7 }}
+                >
+                  {sn.label ?? sn.network} ↗
+                </a>
+              ))}
+            </div>
+          )}
+
+          {/* Link buttons: thin bordered */}
+          {links?.buttons && links.buttons.length > 0 && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {links.buttons.map((btn) => (
+                <a key={btn.id} href={btn.url} target="_blank" rel="noopener noreferrer"
+                  style={{
+                    display: "block", padding: "14px 20px",
+                    border: `1px solid ${colors.primary}30`,
+                    color: colors.primary,
+                    fontWeight: 500, fontSize: 14,
+                    textDecoration: "none",
+                    transition: "border-color 0.15s",
+                  }}
+                >
+                  {btn.label}
+                </a>
+              ))}
+            </div>
+          )}
+
+          <MinimalServicesBlock data={servicesData} colors={colors} />
+          <MinimalContactBlock data={contactData} colors={colors} />
+          <PoweredBy color={colors.text} />
+        </div>
+      )}
+
       {/* ── CLÁSICO (centered, minimal) ─────────────────────── */}
       {layout === "centered" && templateSlug !== "mindfull" && (
         <div style={{ maxWidth: 420, margin: "0 auto", padding: "48px 24px 80px" }}>
@@ -152,7 +288,6 @@ export default async function MicrositePage({ params }: Props) {
                     display: "flex", alignItems: "center", justifyContent: "center",
                     color: colors.primary, fontWeight: 700, fontSize: 13,
                     textDecoration: "none", border: `1.5px solid ${colors.primary}30`,
-                    transition: "transform 0.15s",
                   }}
                   title={sn.network}
                 >
@@ -174,7 +309,6 @@ export default async function MicrositePage({ params }: Props) {
                     color: "#fff", fontWeight: 600, fontSize: 14,
                     textDecoration: "none",
                     boxShadow: `0 4px 12px ${btn.color ?? colors.primary}40`,
-                    transition: "transform 0.15s, opacity 0.15s",
                   }}
                 >
                   {btn.label}
@@ -273,7 +407,7 @@ export default async function MicrositePage({ params }: Props) {
                 {(profile?.name ?? microsite.title)[0].toUpperCase()}
               </div>
             )}
-            <h1 style={{ fontSize: 26, fontWeight: 900, color: colors.primary, margin: "0 0 8px", textTransform: "uppercase", letterSpacing: 1 }}>
+            <h1 style={{ fontSize: 26, fontWeight: 900, color: colors.primary, margin: "0 0 8px" }}>
               {profile?.name ?? microsite.title}
             </h1>
             {profile?.bio && <p style={{ fontSize: 14, color: colors.text, opacity: 0.85, lineHeight: 1.5 }}>{profile.bio}</p>}
@@ -302,7 +436,7 @@ export default async function MicrositePage({ params }: Props) {
                       borderRadius: 16,
                       background: btn.color ?? (i % 2 === 0 ? colors.primary : colors.accent),
                       color: "#fff", fontWeight: 800, fontSize: 15,
-                      textDecoration: "none", textTransform: "uppercase", letterSpacing: 0.5,
+                      textDecoration: "none",
                       boxShadow: `0 6px 20px ${btn.color ?? colors.primary}50`,
                     }}
                   >
@@ -386,12 +520,14 @@ export default async function MicrositePage({ params }: Props) {
 }
 
 type Colors = { background: string; primary: string; accent: string; text: string };
+type ServicesData = { heading?: string; items?: { id: string; title: string; description?: string; icon?: string }[] } | null;
+type ContactData = { phone?: string; whatsapp?: string; email?: string; address?: string; hours?: string } | null;
 
-function ServicesBlock({ data, colors }: { data: { heading?: string; items?: { id: string; title: string; description?: string; icon?: string }[] } | null; colors: Colors }) {
+function ServicesBlock({ data, colors }: { data: ServicesData; colors: Colors }) {
   if (!data?.items || data.items.length === 0) return null;
   return (
     <div style={{ marginTop: 32, paddingTop: 24, borderTop: `1px solid ${colors.primary}18` }}>
-      <h2 style={{ fontSize: 14, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1, color: colors.primary, opacity: 0.6, margin: "0 0 16px", textAlign: "center" }}>
+      <h2 style={{ fontSize: 15, fontWeight: 700, color: colors.primary, margin: "0 0 16px", textAlign: "center" }}>
         {data.heading ?? "Servicios"}
       </h2>
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -409,7 +545,7 @@ function ServicesBlock({ data, colors }: { data: { heading?: string; items?: { i
   );
 }
 
-function ContactBlock({ data, colors }: { data: { phone?: string; whatsapp?: string; email?: string; address?: string; hours?: string } | null; colors: Colors }) {
+function ContactBlock({ data, colors }: { data: ContactData; colors: Colors }) {
   if (!data) return null;
   const items = [
     data.whatsapp && { icon: "💬", label: "WhatsApp", value: data.whatsapp, href: `https://wa.me/${data.whatsapp.replace(/\D/g, "")}` },
@@ -422,7 +558,7 @@ function ContactBlock({ data, colors }: { data: { phone?: string; whatsapp?: str
   if (items.length === 0) return null;
   return (
     <div style={{ marginTop: 24, paddingTop: 24, borderTop: `1px solid ${colors.primary}18` }}>
-      <h2 style={{ fontSize: 14, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1, color: colors.primary, opacity: 0.6, margin: "0 0 16px", textAlign: "center" }}>
+      <h2 style={{ fontSize: 15, fontWeight: 700, color: colors.primary, margin: "0 0 16px", textAlign: "center" }}>
         Contacto
       </h2>
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -434,6 +570,109 @@ function ContactBlock({ data, colors }: { data: { phone?: string; whatsapp?: str
                 <p style={{ margin: 0, fontSize: 11, color: colors.text, opacity: 0.5, fontWeight: 500 }}>{item.label}</p>
                 <p style={{ margin: 0, fontSize: 13, color: colors.primary, fontWeight: 600 }}>{item.value}</p>
               </div>
+            </div>
+          );
+          return item.href
+            ? <a key={item.label} href={item.href} target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none" }}>{inner}</a>
+            : <div key={item.label}>{inner}</div>;
+        })}
+      </div>
+    </div>
+  );
+}
+
+function BrutalServicesBlock({ data }: { data: ServicesData }) {
+  if (!data?.items || data.items.length === 0) return null;
+  return (
+    <div style={{ marginTop: 20, border: "3px solid #000", borderTop: 0 }}>
+      <div style={{ padding: "12px 16px", borderBottom: "3px solid #000", background: "#000" }}>
+        <h2 style={{ fontSize: 13, fontWeight: 900, color: "#fff", margin: 0 }}>
+          {data.heading ?? "SERVICIOS"}
+        </h2>
+      </div>
+      {data.items.map((item, i) => (
+        <div key={item.id} style={{ padding: "12px 16px", borderBottom: i < data.items!.length - 1 ? "2px solid #000" : "none", display: "flex", gap: 10, alignItems: "flex-start" }}>
+          <span style={{ fontSize: 18, lineHeight: 1 }}>{item.icon ?? "→"}</span>
+          <div>
+            <p style={{ margin: 0, fontWeight: 700, fontSize: 14, color: "#000" }}>{item.title}</p>
+            {item.description && <p style={{ margin: "2px 0 0", fontSize: 12, color: "#555", lineHeight: 1.5 }}>{item.description}</p>}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function BrutalContactBlock({ data }: { data: ContactData }) {
+  if (!data) return null;
+  const items = [
+    data.whatsapp && { label: "WhatsApp", value: data.whatsapp, href: `https://wa.me/${data.whatsapp.replace(/\D/g, "")}` },
+    data.phone && { label: "Teléfono", value: data.phone, href: `tel:${data.phone.replace(/\s/g, "")}` },
+    data.email && { label: "Email", value: data.email, href: `mailto:${data.email}` },
+    data.address && { label: "Dirección", value: data.address, href: null },
+    data.hours && { label: "Horario", value: data.hours, href: null },
+  ].filter(Boolean) as { label: string; value: string; href: string | null }[];
+  if (items.length === 0) return null;
+  return (
+    <div style={{ marginTop: 20, border: "3px solid #000", borderTop: 0 }}>
+      <div style={{ padding: "12px 16px", borderBottom: "3px solid #000", background: "#000" }}>
+        <h2 style={{ fontSize: 13, fontWeight: 900, color: "#fff", margin: 0 }}>CONTACTO</h2>
+      </div>
+      {items.map((item, i) => {
+        const inner = (
+          <div style={{ padding: "10px 16px", borderBottom: i < items.length - 1 ? "2px solid #000" : "none" }}>
+            <p style={{ margin: 0, fontSize: 11, color: "#555", fontWeight: 600 }}>{item.label}</p>
+            <p style={{ margin: 0, fontSize: 14, color: "#000", fontWeight: 700 }}>{item.value}</p>
+          </div>
+        );
+        return item.href
+          ? <a key={item.label} href={item.href} target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none" }}>{inner}</a>
+          : <div key={item.label}>{inner}</div>;
+      })}
+    </div>
+  );
+}
+
+function MinimalServicesBlock({ data, colors }: { data: ServicesData; colors: Colors }) {
+  if (!data?.items || data.items.length === 0) return null;
+  return (
+    <div style={{ marginTop: 40, paddingTop: 32, borderTop: `1px solid ${colors.primary}15` }}>
+      <h2 style={{ fontSize: 13, fontWeight: 500, color: colors.primary, opacity: 0.5, margin: "0 0 20px", letterSpacing: 0.5 }}>
+        {data.heading ?? "Servicios"}
+      </h2>
+      <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+        {data.items.map((item) => (
+          <div key={item.id}>
+            <p style={{ margin: 0, fontWeight: 600, fontSize: 15, color: colors.primary }}>{item.title}</p>
+            {item.description && <p style={{ margin: "4px 0 0", fontSize: 13, color: colors.text, opacity: 0.6, lineHeight: 1.6 }}>{item.description}</p>}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function MinimalContactBlock({ data, colors }: { data: ContactData; colors: Colors }) {
+  if (!data) return null;
+  const items = [
+    data.whatsapp && { label: "WhatsApp", value: data.whatsapp, href: `https://wa.me/${data.whatsapp.replace(/\D/g, "")}` },
+    data.phone && { label: "Teléfono", value: data.phone, href: `tel:${data.phone.replace(/\s/g, "")}` },
+    data.email && { label: "Email", value: data.email, href: `mailto:${data.email}` },
+    data.address && { label: "Dirección", value: data.address, href: null },
+    data.hours && { label: "Horario", value: data.hours, href: null },
+  ].filter(Boolean) as { label: string; value: string; href: string | null }[];
+  if (items.length === 0) return null;
+  return (
+    <div style={{ marginTop: 32, paddingTop: 32, borderTop: `1px solid ${colors.primary}15` }}>
+      <h2 style={{ fontSize: 13, fontWeight: 500, color: colors.primary, opacity: 0.5, margin: "0 0 20px", letterSpacing: 0.5 }}>
+        Contacto
+      </h2>
+      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+        {items.map((item) => {
+          const inner = (
+            <div style={{ display: "flex", gap: 12, alignItems: "baseline" }}>
+              <span style={{ fontSize: 12, color: colors.text, opacity: 0.4, fontWeight: 500, minWidth: 72 }}>{item.label}</span>
+              <span style={{ fontSize: 14, color: colors.primary, fontWeight: 500 }}>{item.value}</span>
             </div>
           );
           return item.href

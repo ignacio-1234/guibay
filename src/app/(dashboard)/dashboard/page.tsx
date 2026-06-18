@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import Link from "next/link";
+import { Eye, Plus, ArrowUpRight } from "lucide-react";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -23,10 +24,10 @@ export default async function DashboardPage() {
   const firstName = user.name?.split(" ")[0] ?? "ahí";
 
   return (
-    <div className="p-8 max-w-5xl mx-auto">
+    <div className="p-6 lg:p-8 max-w-5xl mx-auto">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Hola, {firstName} 👋</h1>
+        <h1 className="text-2xl font-black text-gray-900">Hola, {firstName}</h1>
         <p className="text-gray-500 mt-1">Aquí están tus micrositios</p>
       </div>
 
@@ -38,14 +39,14 @@ export default async function DashboardPage() {
             className="bg-white rounded-2xl border border-gray-100 shadow-card p-5 flex flex-col gap-4"
           >
             <div className="flex items-start justify-between">
-              <div>
-                <h2 className="font-semibold text-gray-900">{site.title}</h2>
-                <p className="text-xs text-gray-400 font-mono mt-0.5">
+              <div className="min-w-0">
+                <h2 className="font-semibold text-gray-900 truncate">{site.title}</h2>
+                <p className="text-xs text-gray-400 font-mono mt-0.5 truncate">
                   guibay.com/{site.slug}
                 </p>
               </div>
               <span
-                className={`text-xs px-2 py-1 rounded-full font-medium ${
+                className={`text-xs px-2 py-1 rounded-full font-medium flex-shrink-0 ml-2 ${
                   site.published
                     ? "bg-green-50 text-green-700"
                     : "bg-gray-100 text-gray-500"
@@ -55,14 +56,15 @@ export default async function DashboardPage() {
               </span>
             </div>
 
-            <p className="text-sm text-gray-500">
-              👁 {site._count.analytics} visitas
-            </p>
+            <div className="flex items-center gap-1.5 text-sm text-gray-400">
+              <Eye className="h-3.5 w-3.5" aria-hidden="true" />
+              <span>{site._count.analytics} visitas</span>
+            </div>
 
             <div className="flex gap-2">
               <Link
                 href={`/editor/${site.id}`}
-                className="flex-1 text-center text-sm font-medium bg-primary text-white rounded-xl py-2 hover:bg-primary/90 transition-colors"
+                className="flex-1 text-center text-sm font-semibold bg-primary text-white rounded-xl py-2.5 hover:bg-primary/90 transition-colors"
               >
                 Editar
               </Link>
@@ -71,9 +73,10 @@ export default async function DashboardPage() {
                   href={`/${site.slug}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-1 text-center text-sm font-medium border border-gray-200 text-gray-700 rounded-xl py-2 hover:border-primary hover:text-primary transition-colors"
+                  className="flex-1 flex items-center justify-center gap-1.5 text-sm font-semibold border border-gray-200 text-gray-700 rounded-xl py-2.5 hover:border-primary hover:text-primary transition-colors"
                 >
-                  Ver sitio ↗
+                  Ver sitio
+                  <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
                 </a>
               )}
             </div>
@@ -83,26 +86,28 @@ export default async function DashboardPage() {
         {/* Card: Crear nuevo */}
         <Link
           href="/dashboard/new"
-          className="bg-white rounded-2xl border-2 border-dashed border-gray-200 p-5 flex flex-col items-center justify-center gap-2 min-h-[160px] hover:border-primary hover:text-primary transition-colors group"
+          className="bg-white rounded-2xl border-2 border-dashed border-primary/20 p-5 flex flex-col items-center justify-center gap-2 min-h-[160px] hover:border-primary hover:bg-primary/[0.02] transition-colors group"
         >
-          <span className="text-3xl">+</span>
-          <span className="text-sm font-medium text-gray-500 group-hover:text-primary transition-colors">
+          <div className="w-10 h-10 rounded-full bg-primary-50 group-hover:bg-primary/15 flex items-center justify-center transition-colors">
+            <Plus className="h-5 w-5 text-primary/60 group-hover:text-primary transition-colors" aria-hidden="true" />
+          </div>
+          <span className="text-sm font-semibold text-primary/60 group-hover:text-primary transition-colors">
             Crear nuevo micrositio
           </span>
         </Link>
       </div>
 
-      {/* Banner upgrade (solo plan Free) */}
-      <div className="mt-8 bg-gradient-to-r from-primary to-primary/80 rounded-2xl p-6 flex items-center justify-between text-white">
+      {/* Banner upgrade */}
+      <div className="mt-8 bg-primary rounded-2xl p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-white">
         <div>
-          <p className="font-semibold">Desbloquea más con Pro</p>
+          <p className="font-bold text-lg">Desbloquea más con Pro</p>
           <p className="text-sm text-white/70 mt-0.5">
             Dominio propio, plantillas premium, analíticas avanzadas
           </p>
         </div>
         <Link
           href="/upgrade"
-          className="bg-accent text-white text-sm font-semibold px-5 py-2.5 rounded-full hover:bg-accent/90 transition-colors whitespace-nowrap"
+          className="bg-accent text-white text-sm font-bold px-5 py-2.5 rounded-xl hover:bg-accent/90 transition-colors whitespace-nowrap flex-shrink-0"
         >
           Ver planes →
         </Link>

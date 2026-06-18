@@ -2,7 +2,19 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Check, Loader2, Lock, Sparkles } from "lucide-react";
+import { Check, Loader2, Lock } from "lucide-react";
+
+type TemplateColors = {
+  background: string;
+  primary: string;
+  accent: string;
+  text: string;
+};
+
+type TemplateConfig = {
+  colors: TemplateColors;
+  layout: string;
+};
 
 type Template = {
   id: string;
@@ -12,6 +24,7 @@ type Template = {
   category: string;
   tier: "FREE" | "PRO";
   locked?: boolean;
+  config: TemplateConfig;
 };
 
 type SlugState =
@@ -23,12 +36,121 @@ type SlugState =
 function toClientSlug(value: string) {
   return value
     .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[̀-ͯ]/g, "")
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "")
     .slice(0, 40);
 }
+
+// ── Visual mini-preview por template ──────────────────────
+
+function TemplateMiniPreview({ slug, config }: { slug: string; config: TemplateConfig }) {
+  const { colors, layout } = config;
+
+  if (slug === "brutalista") {
+    return (
+      <div
+        className="h-full bg-white flex flex-col items-center px-4 py-6"
+        style={{ outline: "3px solid #000", outlineOffset: "-3px" }}
+      >
+        <div className="w-10 h-10 bg-black mb-3 flex-shrink-0" />
+        <div className="h-2.5 bg-black w-16 mb-1" />
+        <div className="h-1.5 bg-gray-400 w-20 mb-auto" />
+        <div className="w-full space-y-1.5 mt-4">
+          <div className="h-8 bg-black" />
+          <div className="h-8 bg-white" style={{ border: "3px solid #000" }} />
+        </div>
+      </div>
+    );
+  }
+
+  if (slug === "minimalista") {
+    return (
+      <div className="h-full bg-gray-50 flex flex-col items-center px-4 py-7">
+        <div className="w-10 h-10 rounded-full border border-gray-300 mb-4 flex-shrink-0" />
+        <div className="h-1.5 bg-gray-900 rounded-full w-14 mb-2" />
+        <div className="h-px bg-gray-300 w-20 mb-auto" />
+        <div className="w-full mt-4">
+          <div className="h-px bg-gray-200 w-full mb-3" />
+          <div className="space-y-1.5">
+            <div className="h-7 border border-gray-300" />
+            <div className="h-7 border border-gray-200" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (layout === "full-width") {
+    return (
+      <div className="h-full flex flex-col">
+        <div
+          className="flex-none h-1/2 flex flex-col items-center px-4 pt-5 pb-6"
+          style={{ background: colors.background }}
+        >
+          <div
+            className="w-10 h-10 rounded-full mb-2 flex-shrink-0"
+            style={{ background: `${colors.primary}40`, border: `2px solid ${colors.primary}60` }}
+          />
+          <div className="h-2 rounded-full w-14" style={{ background: colors.primary }} />
+        </div>
+        <div className="flex-1 bg-white px-4 py-3 space-y-1.5">
+          <div className="h-7 rounded-lg" style={{ background: colors.primary }} />
+          <div
+            className="h-7 rounded-lg border"
+            style={{ borderColor: colors.accent, background: "transparent" }}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  if (layout === "card") {
+    return (
+      <div
+        className="h-full p-3 flex flex-col items-center justify-center"
+        style={{ background: colors.background }}
+      >
+        <div className="w-full bg-white rounded-xl overflow-hidden shadow-sm">
+          <div
+            className="h-14 flex flex-col items-center justify-center pt-3"
+            style={{ background: `linear-gradient(135deg, ${colors.primary}, ${colors.accent})` }}
+          >
+            <div className="w-8 h-8 rounded-full bg-white/30 mb-1" />
+          </div>
+          <div className="px-3 py-3 space-y-1.5">
+            <div className="h-1.5 rounded-full w-14 mx-auto" style={{ background: colors.primary }} />
+            <div className="h-1 rounded-full w-20 mx-auto mb-2" style={{ background: `${colors.text}40` }} />
+            <div className="h-6 rounded-lg" style={{ background: colors.primary }} />
+            <div className="h-6 rounded-lg" style={{ background: colors.accent }} />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Default: centered (clásico, mindfull, oscuro-pro, etc.)
+  return (
+    <div
+      className="h-full flex flex-col items-center px-4 py-6"
+      style={{ background: colors.background }}
+    >
+      <div
+        className="w-10 h-10 rounded-full mb-2 flex-shrink-0"
+        style={{ background: `${colors.primary}30` }}
+      />
+      <div className="h-2 rounded-full w-14 mb-1" style={{ background: colors.primary }} />
+      <div className="h-1 rounded-full w-20 mb-auto" style={{ background: `${colors.text}40` }} />
+      <div className="w-full space-y-1.5 mt-4">
+        <div className="h-7 rounded-xl" style={{ background: colors.primary }} />
+        <div className="h-7 rounded-xl" style={{ background: colors.accent }} />
+      </div>
+    </div>
+  );
+}
+
+// ── Formulario ─────────────────────────────────────────────
 
 export function NewMicrositeForm() {
   const router = useRouter();
@@ -46,7 +168,7 @@ export function NewMicrositeForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const selectedTemplate = useMemo(
-    () => templates.find((template) => template.id === selectedTemplateId),
+    () => templates.find((t) => t.id === selectedTemplateId),
     [templates, selectedTemplateId]
   );
 
@@ -66,19 +188,16 @@ export function NewMicrositeForm() {
       }
 
       const payload = await response.json();
-      const loadedTemplates = (payload.data ?? []) as Template[];
-      setTemplates(loadedTemplates);
+      const loaded = (payload.data ?? []) as Template[];
+      setTemplates(loaded);
       setSelectedTemplateId(
-        loadedTemplates.find((template) => !template.locked)?.id ?? loadedTemplates[0]?.id ?? ""
+        loaded.find((t) => !t.locked)?.id ?? loaded[0]?.id ?? ""
       );
       setIsLoadingTemplates(false);
     }
 
     loadTemplates();
-
-    return () => {
-      mounted = false;
-    };
+    return () => { mounted = false; };
   }, []);
 
   useEffect(() => {
@@ -88,10 +207,7 @@ export function NewMicrositeForm() {
 
   useEffect(() => {
     if (slug.length < 3) {
-      setSlugState({
-        status: "idle",
-        message: "El slug necesita al menos 3 caracteres.",
-      });
+      setSlugState({ status: "idle", message: "El slug necesita al menos 3 caracteres." });
       return;
     }
 
@@ -113,12 +229,8 @@ export function NewMicrositeForm() {
         const payload = await response.json();
         setSlugState(
           payload.available
-            ? {
-                status: "available",
-                message: `Disponible: /${payload.slug}`,
-                slug: payload.slug,
-              }
-            : { status: "unavailable", message: "Ese slug ya esta en uso." }
+            ? { status: "available", message: `Disponible: /${payload.slug}`, slug: payload.slug }
+            : { status: "unavailable", message: "Ese slug ya está en uso." }
         );
       } catch (err) {
         if ((err as Error).name !== "AbortError") {
@@ -174,8 +286,9 @@ export function NewMicrositeForm() {
   return (
     <form className="grid gap-6 lg:grid-cols-[1fr_360px]" onSubmit={handleSubmit}>
       <div className="space-y-6">
+        {/* Datos base */}
         <section className="bg-white rounded-2xl border border-gray-100 p-6 shadow-card">
-          <h2 className="text-lg font-semibold text-gray-900">Datos base</h2>
+          <h2 className="text-lg font-bold text-gray-900">Datos base</h2>
           <div className="mt-5 grid gap-4 sm:grid-cols-2">
             <div>
               <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
@@ -184,26 +297,26 @@ export function NewMicrositeForm() {
               <input
                 id="title"
                 value={title}
-                onChange={(event) => setTitle(event.target.value)}
+                onChange={(e) => setTitle(e.target.value)}
                 required
                 minLength={2}
                 maxLength={60}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
                 placeholder="Cafe Aurora"
               />
             </div>
             <div>
               <label htmlFor="slug" className="block text-sm font-medium text-gray-700 mb-1">
-                URL publica
+                URL pública
               </label>
-              <div className="flex rounded-xl border border-gray-200 focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary">
+              <div className="flex rounded-xl border border-gray-200 focus-within:ring-2 focus-within:ring-primary/30 focus-within:border-primary">
                 <span className="px-3 py-3 text-sm text-gray-400">/</span>
                 <input
                   id="slug"
                   value={slug}
-                  onChange={(event) => {
+                  onChange={(e) => {
                     setSlugWasEdited(true);
-                    setSlug(toClientSlug(event.target.value));
+                    setSlug(toClientSlug(e.target.value));
                   }}
                   required
                   minLength={3}
@@ -227,13 +340,16 @@ export function NewMicrositeForm() {
           </div>
         </section>
 
+        {/* Plantillas */}
         <section className="bg-white rounded-2xl border border-gray-100 p-6 shadow-card">
-          <div className="flex items-center justify-between gap-4">
-            <h2 className="text-lg font-semibold text-gray-900">Plantilla</h2>
-            {isLoadingTemplates && <Loader2 className="h-4 w-4 animate-spin text-gray-400" />}
+          <div className="flex items-center justify-between gap-4 mb-5">
+            <h2 className="text-lg font-bold text-gray-900">Elige tu estilo</h2>
+            {isLoadingTemplates && (
+              <Loader2 className="h-4 w-4 animate-spin text-gray-400" aria-hidden="true" />
+            )}
           </div>
 
-          <div className="mt-5 grid gap-3 sm:grid-cols-2">
+          <div className="grid gap-3 grid-cols-2 sm:grid-cols-3">
             {templates.map((template) => {
               const isSelected = selectedTemplateId === template.id;
 
@@ -243,33 +359,49 @@ export function NewMicrositeForm() {
                   type="button"
                   disabled={template.locked}
                   onClick={() => setSelectedTemplateId(template.id)}
-                  className={`min-h-[132px] rounded-2xl border p-4 text-left transition-all disabled:cursor-not-allowed disabled:opacity-60 ${
+                  className={`rounded-2xl border overflow-hidden text-left transition-all disabled:cursor-not-allowed disabled:opacity-50 ${
                     isSelected
-                      ? "border-primary bg-primary/5 ring-2 ring-primary/10"
-                      : "border-gray-100 bg-white hover:border-primary/40"
+                      ? "border-primary ring-2 ring-primary/10"
+                      : "border-gray-100 hover:border-primary/40 hover:shadow-sm"
                   }`}
                 >
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="font-semibold text-gray-900">{template.name}</p>
-                      <p className="mt-1 text-xs uppercase tracking-wide text-gray-400">
-                        {template.category}
-                      </p>
-                    </div>
-                    {template.locked ? (
-                      <Lock className="h-4 w-4 text-gray-400" />
-                    ) : isSelected ? (
-                      <Check className="h-4 w-4 text-primary" />
-                    ) : (
-                      <Sparkles className="h-4 w-4 text-gray-300" />
+                  {/* Visual preview */}
+                  <div className="aspect-[3/4] relative overflow-hidden">
+                    <TemplateMiniPreview slug={template.slug} config={template.config} />
+                    {template.locked && (
+                      <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
+                        <Lock className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                      </div>
+                    )}
+                    {isSelected && (
+                      <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-primary flex items-center justify-center shadow-sm">
+                        <Check className="h-3.5 w-3.5 text-white" aria-hidden="true" />
+                      </div>
                     )}
                   </div>
-                  <p className="mt-3 text-sm text-gray-500">
-                    {template.description ?? "Plantilla lista para personalizar."}
-                  </p>
-                  <span className="mt-4 inline-flex rounded-full bg-surface px-2.5 py-1 text-xs font-medium text-gray-600">
-                    {template.tier}
-                  </span>
+
+                  {/* Info */}
+                  <div className="p-3 border-t border-gray-100 bg-white">
+                    <div className="flex items-start justify-between gap-1.5 mb-0.5">
+                      <p className="font-semibold text-gray-900 text-sm leading-snug">
+                        {template.name}
+                      </p>
+                      <span
+                        className={`text-xs px-1.5 py-0.5 rounded font-medium flex-shrink-0 ${
+                          template.tier === "FREE"
+                            ? "bg-green-50 text-green-700"
+                            : "bg-primary/10 text-primary"
+                        }`}
+                      >
+                        {template.tier === "FREE" ? "Gratis" : "Pro"}
+                      </span>
+                    </div>
+                    {template.description && (
+                      <p className="text-xs text-gray-400 leading-snug">
+                        {template.description}
+                      </p>
+                    )}
+                  </div>
                 </button>
               );
             })}
@@ -277,28 +409,33 @@ export function NewMicrositeForm() {
         </section>
       </div>
 
+      {/* Preview aside */}
       <aside className="bg-white rounded-2xl border border-gray-100 p-6 shadow-card h-fit">
-        <h2 className="text-lg font-semibold text-gray-900">Vista previa</h2>
-        <div className="mt-5 rounded-[28px] border-8 border-gray-900 bg-gray-50 p-5 text-center shadow-card">
-          <div className="mx-auto h-16 w-16 rounded-full bg-primary/10" />
-          <h3 className="mt-4 font-semibold text-gray-900">{title || "Tu negocio"}</h3>
-          <p className="mt-2 text-sm text-gray-500">
-            Tu bio, redes y botones apareceran aqui despues de editar.
-          </p>
-          <div className="mt-5 space-y-3">
-            <div className="h-11 rounded-xl bg-primary" />
-            <div className="h-11 rounded-xl bg-accent" />
+        <h2 className="text-lg font-bold text-gray-900">Vista previa</h2>
+        <div className="mt-5 rounded-[28px] border-8 border-gray-900 bg-gray-50 overflow-hidden shadow-card">
+          <div className="p-5 text-center">
+            <div className="mx-auto h-16 w-16 rounded-full bg-primary/10" />
+            <h3 className="mt-4 font-semibold text-gray-900">{title || "Tu negocio"}</h3>
+            <p className="mt-2 text-sm text-gray-500">
+              Tu bio, redes y botones aparecerán aquí después de editar.
+            </p>
+            <div className="mt-5 space-y-3">
+              <div className="h-11 rounded-xl bg-primary" />
+              <div className="h-11 rounded-xl bg-accent" />
+            </div>
           </div>
         </div>
 
-        {error && <p className="mt-4 rounded-xl bg-red-50 p-3 text-sm text-red-700">{error}</p>}
+        {error && (
+          <p className="mt-4 rounded-xl bg-red-50 p-3 text-sm text-red-700">{error}</p>
+        )}
 
         <button
           type="submit"
           disabled={isSubmitting || slugState.status !== "available" || !selectedTemplateId}
-          className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-accent px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-accent/90 disabled:cursor-not-allowed disabled:opacity-60"
+          className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-accent px-4 py-3 text-sm font-bold text-white transition-colors hover:bg-accent/90 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
+          {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
           Crear y abrir editor
         </button>
       </aside>
