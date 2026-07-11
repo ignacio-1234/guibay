@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Eye, Globe2, Loader2, Plus, Save, Trash2, Phone, Mail, MapPin, Clock } from "lucide-react";
+import { ImageUploader } from "@/components/image-uploader";
 
 type ProfileData = { name: string; bio: string; avatarUrl: string | null; heroUrl: string | null };
 type SocialNetwork = { id: string; network: string; url: string; label?: string };
@@ -148,12 +149,24 @@ export function MicrositeEditor({ initialMicrosite }: { initialMicrosite: Initia
                 <textarea value={profile.bio} onChange={(e) => setProfile((p) => ({ ...p, bio: e.target.value }))} maxLength={240} rows={3} className={`${inputCls} resize-none`} placeholder="Describe tu negocio en pocas palabras..." />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">URL de avatar</label>
-                <input type="url" value={profile.avatarUrl ?? ""} onChange={(e) => setProfile((p) => ({ ...p, avatarUrl: e.target.value }))} className={inputCls} placeholder="https://..." />
+                <label className="block text-sm font-medium text-gray-700 mb-1">Foto de perfil</label>
+                <ImageUploader
+                  value={profile.avatarUrl}
+                  onChange={(url) => setProfile((p) => ({ ...p, avatarUrl: url }))}
+                  kind="avatar"
+                  shape="circle"
+                  hint="Cuadrada, mín. 200×200 px"
+                />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">URL de portada</label>
-                <input type="url" value={profile.heroUrl ?? ""} onChange={(e) => setProfile((p) => ({ ...p, heroUrl: e.target.value }))} className={inputCls} placeholder="https://..." />
+                <label className="block text-sm font-medium text-gray-700 mb-1">Imagen de portada</label>
+                <ImageUploader
+                  value={profile.heroUrl}
+                  onChange={(url) => setProfile((p) => ({ ...p, heroUrl: url }))}
+                  kind="hero"
+                  shape="wide"
+                  hint="Horizontal, se ve arriba de tu sitio"
+                />
               </div>
             </div>
           </section>
