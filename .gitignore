@@ -42,3 +42,4 @@ Thumbs.db
 # Scripts con credenciales — solo uso local
 deploy.ps1
 EJECUTAR-DEPLOY.bat
+.env*
