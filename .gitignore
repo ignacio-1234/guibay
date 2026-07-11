@@ -43,3 +43,8 @@ Thumbs.db
 deploy.ps1
 EJECUTAR-DEPLOY.bat
 .env*
+
+# Config local del editor / artefactos de desarrollo
+.claude/
+_gen_preview.mjs
+/public/_preview/

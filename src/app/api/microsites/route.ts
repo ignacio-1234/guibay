@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { createMicrositeSchema } from "@/lib/validations/microsite";
+import { getEntitlements } from "@/lib/plan";
 import { toSlug } from "@/lib/utils";
 
 // GET /api/microsites — obtener micrositios del usuario
@@ -47,6 +48,24 @@ export async function POST(req: Request) {
     }
 
     const { title, slug, templateId } = validated.data;
+
+    // Límite de micrositios según el plan (Free = 1)
+    const entitlements = await getEntitlements(session.user.id);
+    const micrositeCount = await db.microsite.count({
+      where: { userId: session.user.id },
+    });
+    if (micrositeCount >= entitlements.maxMicrosites) {
+      return NextResponse.json(
+        {
+          error:
+            entitlements.plan === "FREE"
+              ? "El plan Free permite 1 micrositio. Mejora a Pro para crear más."
+              : `Alcanzaste el límite de ${entitlements.maxMicrosites} micrositios.`,
+          code: "LIMIT_REACHED",
+        },
+        { status: 403 }
+      );
+    }
 
     // Verificar slug disponible
     const existing = await db.microsite.findUnique({ where: { slug } });
