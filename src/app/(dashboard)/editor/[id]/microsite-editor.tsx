@@ -11,8 +11,14 @@ type LinkButton = { id: string; label: string; url: string; color?: string };
 type ServiceItem = { id: string; title: string; description: string; icon: string };
 type ContactData = { phone: string; whatsapp: string; email: string; address: string; hours: string };
 
+type StyleOption = {
+  id: string; name: string; slug: string; style: string;
+  colors: { background: string; primary: string; accent: string };
+};
+
 type InitialMicrosite = {
   id: string; title: string; slug: string; published: boolean; templateName: string;
+  templateId: string;
   sections: { id: string; type: string; data: unknown }[];
 };
 
@@ -35,7 +41,7 @@ function cleanButtons(buttons: LinkButton[]) {
   return buttons.map((b) => ({ ...b, label: b.label.trim(), url: b.url.trim(), color: b.color || "#2D1B69" })).filter((b) => b.label && b.url);
 }
 
-export function MicrositeEditor({ initialMicrosite }: { initialMicrosite: InitialMicrosite }) {
+export function MicrositeEditor({ initialMicrosite, styles = [] }: { initialMicrosite: InitialMicrosite; styles?: StyleOption[] }) {
   const initialProfile = useMemo(() => readSectionData<ProfileData>(initialMicrosite.sections, "PROFILE", { name: initialMicrosite.title, bio: "", avatarUrl: null, heroUrl: null }), [initialMicrosite]);
   const initialSocial = useMemo(() => readSectionData<{ networks: SocialNetwork[] }>(initialMicrosite.sections, "SOCIAL", { networks: [] }), [initialMicrosite]);
   const initialLinks = useMemo(() => readSectionData<{ buttons: LinkButton[] }>(initialMicrosite.sections, "LINKS", { buttons: [] }), [initialMicrosite]);
@@ -43,6 +49,7 @@ export function MicrositeEditor({ initialMicrosite }: { initialMicrosite: Initia
   const initialContact = useMemo(() => readSectionData<ContactData>(initialMicrosite.sections, "CONTACT", { phone: "", whatsapp: "", email: "", address: "", hours: "" }), [initialMicrosite]);
 
   const [title, setTitle] = useState(initialMicrosite.title);
+  const [templateId, setTemplateId] = useState(initialMicrosite.templateId);
   const [profile, setProfile] = useState<ProfileData>(initialProfile);
   const [networks, setNetworks] = useState<SocialNetwork[]>(initialSocial.networks ?? []);
   const [buttons, setButtons] = useState<LinkButton[]>(initialLinks.buttons ?? []);
@@ -63,9 +70,9 @@ export function MicrositeEditor({ initialMicrosite }: { initialMicrosite: Initia
 
     const micrositeRes = await fetch(`/api/microsites/${initialMicrosite.id}`, {
       method: "PATCH", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title }),
+      body: JSON.stringify({ title, templateId }),
     });
-    if (!micrositeRes.ok) { setIsSaving(false); setError((await micrositeRes.json()).error ?? "Error al guardar título."); return false; }
+    if (!micrositeRes.ok) { setIsSaving(false); setError((await micrositeRes.json()).error ?? "Error al guardar."); return false; }
 
     const body: Record<string, unknown> = {
       profile,
@@ -131,6 +138,36 @@ export function MicrositeEditor({ initialMicrosite }: { initialMicrosite: Initia
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
         <div className="space-y-6">
+
+          {/* Estilo */}
+          {styles.length > 0 && (
+            <section className="bg-white rounded-2xl border border-gray-100 p-6 shadow-card">
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900">Estilo</h2>
+                <p className="text-xs text-gray-400 mt-0.5">Elige el aspecto de tu página</p>
+              </div>
+              <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3">
+                {styles.map((s) => {
+                  const active = s.id === templateId;
+                  return (
+                    <button
+                      key={s.id}
+                      type="button"
+                      onClick={() => setTemplateId(s.id)}
+                      aria-pressed={active}
+                      className={`group text-left rounded-xl border p-3 transition ${active ? "border-primary ring-2 ring-primary/20" : "border-gray-200 hover:border-primary/50"}`}
+                    >
+                      <div className="flex h-14 items-end gap-1 overflow-hidden rounded-lg p-2" style={{ background: s.colors.background }}>
+                        <span className="h-6 flex-1 rounded" style={{ background: s.colors.primary }} />
+                        <span className="h-4 w-4 rounded-full" style={{ background: s.colors.accent }} />
+                      </div>
+                      <p className={`mt-2 text-xs font-semibold ${active ? "text-primary" : "text-gray-700"}`}>{s.name}</p>
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+          )}
 
           {/* Perfil */}
           <section className="bg-white rounded-2xl border border-gray-100 p-6 shadow-card">

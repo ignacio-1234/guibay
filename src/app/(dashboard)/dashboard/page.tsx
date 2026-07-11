@@ -1,7 +1,9 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { getEntitlements } from "@/lib/plan";
 import Link from "next/link";
-import { Eye, Plus, ArrowUpRight } from "lucide-react";
+import { redirect } from "next/navigation";
+import { Eye, Plus, ArrowUpRight, Lock, Sparkles } from "lucide-react";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -10,25 +12,36 @@ export const metadata: Metadata = {
 
 export default async function DashboardPage() {
   const session = await auth();
-  const user = session!.user;
+  if (!session?.user?.id) redirect("/login");
+  const user = session.user;
 
-  const microsites = await db.microsite.findMany({
-    where: { userId: user.id! },
-    include: {
-      template: true,
-      _count: { select: { analytics: true } },
-    },
-    orderBy: { updatedAt: "desc" },
-  });
+  const [microsites, entitlements] = await Promise.all([
+    db.microsite.findMany({
+      where: { userId: user.id },
+      include: {
+        template: true,
+        _count: { select: { analytics: true } },
+      },
+      orderBy: { updatedAt: "desc" },
+    }),
+    getEntitlements(user.id),
+  ]);
 
+  const atLimit = microsites.length >= entitlements.maxMicrosites;
   const firstName = user.name?.split(" ")[0] ?? "ahí";
 
   return (
     <div className="p-6 lg:p-8 max-w-5xl mx-auto">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-black text-gray-900">Hola, {firstName}</h1>
-        <p className="text-gray-500 mt-1">Aquí están tus micrositios</p>
+      <div className="mb-8 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-black text-gray-900">Hola, {firstName}</h1>
+          <p className="text-gray-500 mt-1">Aquí están tus micrositios</p>
+        </div>
+        <span className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-600">
+          <span className={`h-1.5 w-1.5 rounded-full ${entitlements.plan === "PRO" ? "bg-accent" : "bg-gray-400"}`} />
+          Plan {entitlements.plan === "PRO" ? "Pro" : "Free"} · {microsites.length}/{entitlements.maxMicrosites} sitios
+        </span>
       </div>
 
       {/* Grid de micrositios */}
@@ -83,18 +96,33 @@ export default async function DashboardPage() {
           </div>
         ))}
 
-        {/* Card: Crear nuevo */}
-        <Link
-          href="/dashboard/new"
-          className="bg-white rounded-2xl border-2 border-dashed border-primary/20 p-5 flex flex-col items-center justify-center gap-2 min-h-[160px] hover:border-primary hover:bg-primary/[0.02] transition-colors group"
-        >
-          <div className="w-10 h-10 rounded-full bg-primary-50 group-hover:bg-primary/15 flex items-center justify-center transition-colors">
-            <Plus className="h-5 w-5 text-primary/60 group-hover:text-primary transition-colors" aria-hidden="true" />
-          </div>
-          <span className="text-sm font-semibold text-primary/60 group-hover:text-primary transition-colors">
-            Crear nuevo micrositio
-          </span>
-        </Link>
+        {/* Card: Crear nuevo — o CTA de upgrade si llegó al límite */}
+        {atLimit ? (
+          <Link
+            href="/upgrade"
+            className="bg-primary/[0.03] rounded-2xl border-2 border-dashed border-accent/30 p-5 flex flex-col items-center justify-center gap-2 min-h-[160px] hover:border-accent hover:bg-accent/[0.04] transition-colors group text-center"
+          >
+            <div className="w-10 h-10 rounded-full bg-accent/10 group-hover:bg-accent/15 flex items-center justify-center transition-colors">
+              <Lock className="h-5 w-5 text-accent" aria-hidden="true" />
+            </div>
+            <span className="text-sm font-semibold text-gray-700">Llegaste al límite del plan Free</span>
+            <span className="inline-flex items-center gap-1 text-xs font-semibold text-accent">
+              <Sparkles className="h-3.5 w-3.5" aria-hidden="true" /> Mejora a Pro para crear más
+            </span>
+          </Link>
+        ) : (
+          <Link
+            href="/dashboard/new"
+            className="bg-white rounded-2xl border-2 border-dashed border-primary/20 p-5 flex flex-col items-center justify-center gap-2 min-h-[160px] hover:border-primary hover:bg-primary/[0.02] transition-colors group"
+          >
+            <div className="w-10 h-10 rounded-full bg-primary-50 group-hover:bg-primary/15 flex items-center justify-center transition-colors">
+              <Plus className="h-5 w-5 text-primary/60 group-hover:text-primary transition-colors" aria-hidden="true" />
+            </div>
+            <span className="text-sm font-semibold text-primary/60 group-hover:text-primary transition-colors">
+              Crear nuevo micrositio
+            </span>
+          </Link>
+        )}
       </div>
 
       {/* Banner upgrade */}

@@ -15,9 +15,11 @@ export default auth((req) => {
   const isAuthRoute = AUTH_ROUTES.includes(path);
   const isProtectedRoute = PROTECTED_PREFIX.some((prefix) => path.startsWith(prefix));
   const isApiAuthRoute = path.startsWith("/api/auth");
+  // Webhooks entrantes (ej. MercadoPago) son públicos: se autentican por firma.
+  const isPublicApiRoute = path.startsWith("/api/webhooks");
   const isApiRoute = path.startsWith("/api");
 
-  if (isApiAuthRoute) return NextResponse.next();
+  if (isApiAuthRoute || isPublicApiRoute) return NextResponse.next();
 
   if (isApiRoute && !isLoggedIn) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

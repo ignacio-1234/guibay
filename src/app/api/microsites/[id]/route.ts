@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { updateMicrositeSchema } from "@/lib/validations/microsite";
+import { getUserPlan } from "@/lib/plan";
 
 interface Params {
   params: Promise<{ id: string }>;
@@ -62,6 +63,21 @@ export async function PATCH(req: Request, { params }: Params) {
 
     if (!existing) {
       return NextResponse.json({ error: "No encontrado" }, { status: 404 });
+    }
+
+    // Si se cambia el estilo (templateId), validar que exista, esté activo
+    // y que el plan del usuario lo permita.
+    if (validated.data.templateId) {
+      const template = await db.template.findUnique({
+        where: { id: validated.data.templateId },
+        select: { isActive: true, tier: true },
+      });
+      if (!template || !template.isActive) {
+        return NextResponse.json({ error: "Estilo no válido" }, { status: 400 });
+      }
+      if (template.tier === "PRO" && (await getUserPlan(session.user.id)) === "FREE") {
+        return NextResponse.json({ error: "Ese estilo requiere el plan Pro" }, { status: 403 });
+      }
     }
 
     const microsite = await db.microsite.update({

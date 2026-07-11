@@ -20,17 +20,39 @@ export default async function EditorPage({ params }: Props) {
     notFound();
   }
 
-  const microsite = await db.microsite.findFirst({
-    where: { id, userId: session.user.id },
-    include: {
-      template: true,
-      sections: { orderBy: { order: "asc" } },
-    },
-  });
+  const [microsite, styleTemplates] = await Promise.all([
+    db.microsite.findFirst({
+      where: { id, userId: session.user.id },
+      include: {
+        template: true,
+        sections: { orderBy: { order: "asc" } },
+      },
+    }),
+    db.template.findMany({
+      where: { isActive: true },
+      orderBy: { name: "asc" },
+      select: { id: true, name: true, slug: true, config: true },
+    }),
+  ]);
 
   if (!microsite) {
     notFound();
   }
+
+  const styles = styleTemplates.map((t) => {
+    const cfg = (t.config ?? {}) as { colors?: Record<string, string>; style?: string };
+    return {
+      id: t.id,
+      name: t.name,
+      slug: t.slug,
+      style: cfg.style ?? t.slug,
+      colors: {
+        background: cfg.colors?.background ?? "#FAFAFA",
+        primary: cfg.colors?.primary ?? "#111827",
+        accent: cfg.colors?.accent ?? "#3B82F6",
+      },
+    };
+  });
 
   return (
     <MicrositeEditor
@@ -40,12 +62,14 @@ export default async function EditorPage({ params }: Props) {
         slug: microsite.slug,
         published: microsite.published,
         templateName: microsite.template.name,
+        templateId: microsite.templateId,
         sections: microsite.sections.map((section) => ({
           id: section.id,
           type: section.type,
           data: section.data,
         })),
       }}
+      styles={styles}
     />
   );
 }
