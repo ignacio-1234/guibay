@@ -14,6 +14,7 @@ type TemplateColors = {
 type TemplateConfig = {
   colors: TemplateColors;
   layout: string;
+  style?: string;
 };
 
 type Template = {
@@ -47,36 +48,101 @@ function toClientSlug(value: string) {
 
 function TemplateMiniPreview({ slug, config }: { slug: string; config: TemplateConfig }) {
   const { colors, layout } = config;
+  const style = config.style ?? slug;
 
-  if (slug === "brutalista") {
+  // Brutalismo: bordes gruesos y sombras duras.
+  if (style === "brutal") {
     return (
       <div
-        className="h-full bg-white flex flex-col items-center px-4 py-6"
-        style={{ outline: "3px solid #000", outlineOffset: "-3px" }}
+        className="h-full flex flex-col items-center px-4 py-6"
+        style={{ background: colors.background, outline: `3px solid ${colors.primary}`, outlineOffset: "-3px" }}
       >
-        <div className="w-10 h-10 bg-black mb-3 flex-shrink-0" />
-        <div className="h-2.5 bg-black w-16 mb-1" />
-        <div className="h-1.5 bg-gray-400 w-20 mb-auto" />
+        <div className="w-10 h-10 mb-3 flex-shrink-0" style={{ background: colors.primary }} />
+        <div className="h-2.5 w-16 mb-1" style={{ background: colors.primary }} />
+        <div className="h-1.5 w-20 mb-auto" style={{ background: `${colors.text}55` }} />
         <div className="w-full space-y-1.5 mt-4">
-          <div className="h-8 bg-black" />
-          <div className="h-8 bg-white" style={{ border: "3px solid #000" }} />
+          <div className="h-8" style={{ background: colors.accent, boxShadow: `3px 3px 0 ${colors.primary}` }} />
+          <div className="h-8" style={{ background: colors.background, border: `3px solid ${colors.primary}` }} />
         </div>
       </div>
     );
   }
 
-  if (slug === "minimalista") {
+  // Minimalismo: hairlines, mucho aire.
+  if (style === "minimal") {
     return (
-      <div className="h-full bg-gray-50 flex flex-col items-center px-4 py-7">
-        <div className="w-10 h-10 rounded-full border border-gray-300 mb-4 flex-shrink-0" />
-        <div className="h-1.5 bg-gray-900 rounded-full w-14 mb-2" />
-        <div className="h-px bg-gray-300 w-20 mb-auto" />
+      <div className="h-full flex flex-col items-center px-4 py-7" style={{ background: colors.background }}>
+        <div className="w-10 h-10 rounded-full mb-4 flex-shrink-0" style={{ border: `1px solid ${colors.text}40` }} />
+        <div className="h-1.5 rounded-full w-14 mb-2" style={{ background: colors.primary }} />
+        <div className="h-px w-20 mb-auto" style={{ background: `${colors.text}30` }} />
         <div className="w-full mt-4">
-          <div className="h-px bg-gray-200 w-full mb-3" />
-          <div className="space-y-1.5">
-            <div className="h-7 border border-gray-300" />
-            <div className="h-7 border border-gray-200" />
+          <div className="h-px w-full mb-3" style={{ background: `${colors.text}20` }} />
+          <div className="space-y-2">
+            <div className="h-px w-full" style={{ background: `${colors.text}30` }} />
+            <div className="h-px w-full" style={{ background: `${colors.text}20` }} />
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Glassmorphism: tarjetas de vidrio sobre degradado.
+  if (style === "glass") {
+    return (
+      <div
+        className="h-full flex flex-col items-center px-4 py-6"
+        style={{ background: `radial-gradient(60% 50% at 20% 10%, ${colors.primary}55, transparent 70%), radial-gradient(50% 45% at 85% 20%, ${colors.accent}55, transparent 70%), ${colors.background}` }}
+      >
+        <div className="w-10 h-10 rounded-full mb-3 flex-shrink-0" style={{ background: "rgba(255,255,255,0.45)", border: "1px solid rgba(255,255,255,0.7)" }} />
+        <div className="h-2 rounded-full w-14 mb-auto" style={{ background: colors.primary }} />
+        <div className="w-full space-y-1.5 mt-4">
+          <div className="h-7 rounded-lg" style={{ background: "rgba(255,255,255,0.4)", border: "1px solid rgba(255,255,255,0.7)", backdropFilter: "blur(4px)" }} />
+          <div className="h-7 rounded-lg" style={{ background: `${colors.primary}cc` }} />
+        </div>
+      </div>
+    );
+  }
+
+  // Claymorphism: formas esponjosas con doble sombra.
+  if (style === "clay") {
+    return (
+      <div className="h-full flex flex-col items-center px-4 py-6" style={{ background: colors.background }}>
+        <div className="w-10 h-10 rounded-2xl mb-3 flex-shrink-0" style={{ background: colors.background, boxShadow: `4px 4px 8px ${colors.primary}33, -4px -4px 8px #fff` }} />
+        <div className="h-2 rounded-full w-14 mb-auto" style={{ background: colors.primary }} />
+        <div className="w-full space-y-2 mt-4">
+          <div className="h-7 rounded-2xl" style={{ background: colors.background, boxShadow: `4px 4px 8px ${colors.primary}33, -4px -4px 8px #fff` }} />
+          <div className="h-7 rounded-2xl" style={{ background: colors.accent, boxShadow: `4px 4px 8px ${colors.accent}55` }} />
+        </div>
+      </div>
+    );
+  }
+
+  // UI Espacial: oscuro con neón.
+  if (style === "spatial") {
+    return (
+      <div
+        className="h-full flex flex-col items-center px-4 py-6"
+        style={{ background: `radial-gradient(55% 45% at 25% 10%, ${colors.primary}44, transparent 65%), ${colors.background}` }}
+      >
+        <div className="w-10 h-10 rounded-full mb-3 flex-shrink-0" style={{ background: "transparent", border: `2px solid ${colors.primary}`, boxShadow: `0 0 12px ${colors.accent}` }} />
+        <div className="h-2 rounded-full w-14 mb-auto" style={{ background: `linear-gradient(90deg, ${colors.primary}, ${colors.accent})` }} />
+        <div className="w-full space-y-1.5 mt-4">
+          <div className="h-7 rounded-lg" style={{ background: `linear-gradient(120deg, ${colors.primary}, ${colors.accent})` }} />
+          <div className="h-7 rounded-lg" style={{ background: `${colors.primary}22`, border: `1px solid ${colors.primary}55` }} />
+        </div>
+      </div>
+    );
+  }
+
+  // Maximalismo: tipografía enorme y bloques de color.
+  if (style === "maximal") {
+    return (
+      <div className="h-full flex flex-col items-center px-4 py-5" style={{ background: colors.background }}>
+        <div className="w-full h-6 mb-1" style={{ background: colors.primary }} />
+        <div className="w-full h-6 mb-auto" style={{ background: colors.accent }} />
+        <div className="w-full space-y-1.5 mt-3">
+          <div className="h-7 rounded-lg" style={{ background: colors.accent, border: `3px solid ${colors.primary}`, boxShadow: `4px 4px 0 ${colors.primary}` }} />
+          <div className="h-7 rounded-lg" style={{ background: colors.background, border: `3px solid ${colors.primary}`, boxShadow: `4px 4px 0 ${colors.primary}` }} />
         </div>
       </div>
     );

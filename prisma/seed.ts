@@ -8,7 +8,17 @@ async function main() {
   // ── Planes ──────────────────────────────────
   const freePlan = await prisma.plan.upsert({
     where: { name: PlanName.FREE },
-    update: {},
+    update: {
+      priceMonthly: 0,
+      priceAnnual: 0,
+      features: [
+        "1 micrositio",
+        "1 estilo de diseño",
+        "Redes sociales ilimitadas",
+        "Dominio guibay.com/tu-marca",
+        "Analíticas básicas",
+      ],
+    },
     create: {
       name: PlanName.FREE,
       displayName: "Free",
@@ -16,7 +26,7 @@ async function main() {
       priceAnnual: 0,
       features: [
         "1 micrositio",
-        "Plantillas básicas",
+        "1 estilo de diseño",
         "Redes sociales ilimitadas",
         "Dominio guibay.com/tu-marca",
         "Analíticas básicas",
@@ -26,18 +36,29 @@ async function main() {
 
   const proPlan = await prisma.plan.upsert({
     where: { name: PlanName.PRO },
-    update: {},
+    update: {
+      priceMonthly: 4990,
+      priceAnnual: 47900,
+      features: [
+        "Hasta 10 micrositios",
+        "Los 6 estilos de diseño",
+        "Sin marca Guibay",
+        "Analíticas avanzadas",
+        "Dominio personalizado",
+        "Soporte prioritario",
+      ],
+    },
     create: {
       name: PlanName.PRO,
       displayName: "Pro",
-      priceMonthly: 5,
-      priceAnnual: 48,
+      priceMonthly: 4990,
+      priceAnnual: 47900,
       features: [
-        "Todo lo de Free",
-        "Plantillas premium",
-        "Dominio personalizado",
-        "Analíticas avanzadas",
+        "Hasta 10 micrositios",
+        "Los 6 estilos de diseño",
         "Sin marca Guibay",
+        "Analíticas avanzadas",
+        "Dominio personalizado",
         "Soporte prioritario",
       ],
     },
@@ -45,203 +66,107 @@ async function main() {
 
   console.log("✅ Plans:", freePlan.name, proPlan.name);
 
-  // ── Templates ──────────────────────────────────
-  const templates = await Promise.all([
-    prisma.template.upsert({
-      where: { slug: "mindfull" },
-      update: {},
-      create: {
-        name: "MindFull",
-        slug: "mindfull",
-        description: "Elegante y minimalista, ideal para coaches y profesionales",
-        category: "professional",
-        tier: TemplateTier.FREE,
-        config: {
-          colors: {
-            background: "#FFFFFF",
-            primary: "#2D1B69",
-            accent: "#FF1654",
-            text: "#1A1A2E",
-          },
-          fonts: {
-            heading: "Inter",
-            body: "Inter",
-          },
-          layout: "centered",
-        },
-      },
-    }),
-    prisma.template.upsert({
-      where: { slug: "vibrante" },
-      update: {},
-      create: {
-        name: "Vibrante",
-        slug: "vibrante",
-        description: "Colorido y energético, perfecto para negocios creativos",
-        category: "creative",
-        tier: TemplateTier.FREE,
-        config: {
-          colors: {
-            background: "#FF1654",
-            primary: "#FFFFFF",
-            accent: "#FFD600",
-            text: "#FFFFFF",
-          },
-          fonts: {
-            heading: "Inter",
-            body: "Inter",
-          },
-          layout: "full-width",
-        },
-      },
-    }),
-    prisma.template.upsert({
-      where: { slug: "oscuro-pro" },
-      update: {},
-      create: {
-        name: "Oscuro Pro",
-        slug: "oscuro-pro",
-        description: "Dark mode elegante, para marcas premium",
-        category: "business",
-        tier: TemplateTier.PRO,
-        config: {
-          colors: {
-            background: "#0F0F1A",
-            primary: "#FFFFFF",
-            accent: "#FF1654",
-            text: "#E5E7EB",
-          },
-          fonts: {
-            heading: "Inter",
-            body: "Inter",
-          },
-          layout: "centered",
-        },
-      },
-    }),
-    prisma.template.upsert({
-      where: { slug: "naturaleza" },
-      update: {},
-      create: {
-        name: "Naturaleza",
-        slug: "naturaleza",
-        description: "Tonos tierra, ideal para gastronomía y productos naturales",
-        category: "business",
-        tier: TemplateTier.FREE,
-        config: {
-          colors: {
-            background: "#F5F0E8",
-            primary: "#4A3728",
-            accent: "#8B6B3D",
-            text: "#2C1810",
-          },
-          fonts: {
-            heading: "Inter",
-            body: "Inter",
-          },
-          layout: "card",
-        },
-      },
-    }),
-    prisma.template.upsert({
-      where: { slug: "neon-city" },
-      update: {},
-      create: {
-        name: "Neon City",
-        slug: "neon-city",
-        description: "Estética urbana y futurista para creadores y artistas",
-        category: "creative",
-        tier: TemplateTier.PRO,
-        config: {
-          colors: {
-            background: "#0A0A0F",
-            primary: "#00FFD1",
-            accent: "#FF00FF",
-            text: "#FFFFFF",
-          },
-          fonts: {
-            heading: "Inter",
-            body: "Inter",
-          },
-          layout: "full-width",
-        },
-      },
-    }),
-    prisma.template.upsert({
-      where: { slug: "clasico" },
-      update: {},
-      create: {
-        name: "Clásico",
-        slug: "clasico",
-        description: "Simple, limpio y profesional para cualquier rubro",
-        category: "minimal",
-        tier: TemplateTier.FREE,
-        config: {
-          colors: {
-            background: "#FAFAFA",
-            primary: "#111827",
-            accent: "#3B82F6",
-            text: "#374151",
-          },
-          fonts: {
-            heading: "Inter",
-            body: "Inter",
-          },
-          layout: "centered",
-        },
-      },
-    }),
-    prisma.template.upsert({
-      where: { slug: "brutalista" },
-      update: {},
-      create: {
-        name: "Brutalista",
-        slug: "brutalista",
-        description: "Bordes gruesos, sin rodeos. Diseño que se hace notar",
-        category: "creative",
-        tier: TemplateTier.PRO,
-        config: {
-          colors: {
-            background: "#FFFFFF",
-            primary: "#000000",
-            accent: "#FF3300",
-            text: "#111111",
-          },
-          fonts: {
-            heading: "Inter",
-            body: "Inter",
-          },
-          layout: "brutal",
-        },
-      },
-    }),
-    prisma.template.upsert({
-      where: { slug: "minimalista" },
-      update: {},
-      create: {
-        name: "Minimalista",
-        slug: "minimalista",
-        description: "Espacio en blanco, tipografía fina. Menos es más",
-        category: "minimal",
-        tier: TemplateTier.PRO,
-        config: {
-          colors: {
-            background: "#F9F9F8",
-            primary: "#111111",
-            accent: "#555555",
-            text: "#333333",
-          },
-          fonts: {
-            heading: "Inter",
-            body: "Inter",
-          },
-          layout: "minimal",
-        },
-      },
-    }),
-  ]);
+  // ── Estilos (plantillas) ────────────────────
+  // Los 6 estilos que el usuario puede elegir. Todos son FREE-seleccionables;
+  // el plan Free tiene 1 sitio (1 estilo a la vez), Pro puede tener varios.
+  const STYLES = [
+    {
+      name: "Minimalismo",
+      slug: "minimalismo",
+      description: "Limpio y elegante. Deja respirar tu contenido.",
+      category: "minimal",
+      colors: { background: "#FFFFFF", primary: "#111111", accent: "#111111", text: "#3F3F46" },
+      layout: "minimal",
+      style: "minimal",
+    },
+    {
+      name: "Glassmorphism",
+      slug: "glassmorphism",
+      description: "Vidrio esmerilado y profundidad. Moderno y fresco.",
+      category: "creative",
+      colors: { background: "#EEF2FF", primary: "#4338CA", accent: "#06B6D4", text: "#1E1B4B" },
+      layout: "card",
+      style: "glass",
+    },
+    {
+      name: "Claymorphism",
+      slug: "claymorphism",
+      description: "Formas suaves y esponjosas. Amable y cercano.",
+      category: "creative",
+      colors: { background: "#EDEBFF", primary: "#6D5AE6", accent: "#FF8FB1", text: "#2E2A4A" },
+      layout: "card",
+      style: "clay",
+    },
+    {
+      name: "UI Espacial",
+      slug: "ui-espacial",
+      description: "Oscuro, futurista y con brillos de neón.",
+      category: "creative",
+      colors: { background: "#070713", primary: "#A78BFA", accent: "#22D3EE", text: "#E5E7EB" },
+      layout: "full-width",
+      style: "spatial",
+    },
+    {
+      name: "Maximalismo",
+      slug: "maximalismo",
+      description: "Colores intensos y tipografía enorme. Imposible de ignorar.",
+      category: "creative",
+      colors: { background: "#FFE600", primary: "#141414", accent: "#FF2D95", text: "#141414" },
+      layout: "full-width",
+      style: "maximal",
+    },
+    {
+      name: "Brutalismo",
+      slug: "brutalismo",
+      description: "Bordes gruesos y sin rodeos. Diseño que se hace notar.",
+      category: "creative",
+      colors: { background: "#FFFFFF", primary: "#000000", accent: "#FF3300", text: "#111111" },
+      layout: "brutal",
+      style: "brutal",
+    },
+  ] as const;
 
-  console.log(`✅ Templates: ${templates.length} creados`);
+  const templates = await Promise.all(
+    STYLES.map((s) =>
+      prisma.template.upsert({
+        where: { slug: s.slug },
+        update: {
+          name: s.name,
+          description: s.description,
+          category: s.category,
+          tier: TemplateTier.FREE,
+          isActive: true,
+          config: {
+            colors: s.colors,
+            fonts: { heading: "Inter", body: "Inter" },
+            layout: s.layout,
+            style: s.style,
+          },
+        },
+        create: {
+          name: s.name,
+          slug: s.slug,
+          description: s.description,
+          category: s.category,
+          tier: TemplateTier.FREE,
+          config: {
+            colors: s.colors,
+            fonts: { heading: "Inter", body: "Inter" },
+            layout: s.layout,
+            style: s.style,
+          },
+        },
+      })
+    )
+  );
+
+  // Ocultar plantillas viejas del selector (los sitios existentes las siguen usando).
+  await prisma.template.updateMany({
+    where: { slug: { in: ["mindfull", "vibrante", "oscuro-pro", "naturaleza", "neon-city", "clasico", "brutalista", "minimalista"] } },
+    data: { isActive: false },
+  });
+
+  console.log(`✅ Estilos: ${templates.length} creados`);
   console.log("🎉 Seed completado!");
 }
 
