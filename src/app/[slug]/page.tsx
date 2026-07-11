@@ -304,10 +304,28 @@ export default async function MicrositePage({ params }: Props) {
 
   const heroHasImg = !!profile?.heroUrl;
   const heroStyle: React.CSSProperties | undefined = heroHasImg
-    ? {
-        backgroundImage: `linear-gradient(180deg, rgba(0,0,0,0.32), rgba(0,0,0,0.62)), url(${profile!.heroUrl})`,
-      }
+    ? { backgroundImage: `url(${profile!.heroUrl})` }
     : undefined;
+
+  // CTA principal del negocio: WhatsApp > primer enlace > teléfono.
+  const waDigits = contact?.whatsapp?.replace(/\D/g, "");
+  const primaryCta = waDigits
+    ? { label: "Escríbenos por WhatsApp", href: `https://wa.me/${waDigits}`, icon: "whatsapp" }
+    : links[0]
+      ? { label: links[0].label, href: links[0].url, icon: "link" }
+      : contact?.phone
+        ? { label: "Llámanos", href: `tel:${contact.phone.replace(/\s/g, "")}`, icon: "phone" }
+        : null;
+  // CTA secundario: ancla a una sección.
+  const secondaryCta = hasServices
+    ? { label: "Ver lo que ofrecemos", href: "#servicios" }
+    : hasContact
+      ? { label: "Cómo contactarnos", href: "#contacto" }
+      : null;
+  // Mapa embebido de Google (no requiere API key).
+  const mapSrc = contact?.address
+    ? `https://www.google.com/maps?q=${encodeURIComponent(contact.address)}&output=embed`
+    : null;
 
   const Avatar = ({ className }: { className: string }) =>
     profile?.avatarUrl ? (
@@ -317,9 +335,9 @@ export default async function MicrositePage({ params }: Props) {
       <div className={`${className} gb-fallback`}>{initial}</div>
     );
 
-  const Socials = ({ inBar = false }: { inBar?: boolean }) =>
+  const Socials = () =>
     socials.length === 0 ? null : (
-      <nav className="gb-socials" aria-label={inBar ? "Redes en cabecera" : "Redes sociales"}>
+      <nav className="gb-socials" aria-label="Redes sociales">
         {socials.map((sn) => (
           <a key={sn.id} className="gb-social" href={sn.url} target="_blank" rel="noopener noreferrer" title={sn.label ?? sn.network} aria-label={sn.label ?? sn.network}>
             <Icon name={networkKey(sn.network)} />
@@ -328,9 +346,14 @@ export default async function MicrositePage({ params }: Props) {
       </nav>
     );
 
+  const ctaTarget = (href: string) =>
+    href.startsWith("http") ? { target: "_blank", rel: "noopener noreferrer" } : {};
+
   return (
-    <div className={`gb-root gb-tpl-${family}`} style={vars}>
-      {/* Barra superior */}
+    <div className={`gb-root gb-tpl-${family}${heroHasImg ? " gb-has-hero" : ""}`} style={vars}>
+      <span id="top" />
+
+      {/* Barra */}
       <header className="gb-bar">
         <a className="gb-brand" href="#top">
           <span className="gb-brand-mark">
@@ -343,69 +366,49 @@ export default async function MicrositePage({ params }: Props) {
           </span>
           {brand}
         </a>
-        <div className="gb-nav">
-          {links.length > 0 && <a className="gb-navlink" href="#enlaces">Enlaces</a>}
+        <nav className="gb-nav" aria-label="Secciones">
           {hasServices && <a className="gb-navlink" href="#servicios">Servicios</a>}
           {hasContact && <a className="gb-navlink" href="#contacto">Contacto</a>}
-          {socials.length > 0 && <Socials inBar />}
-        </div>
+          {primaryCta && (
+            <a className="gb-nav-cta" href={primaryCta.href} {...ctaTarget(primaryCta.href)}>
+              {primaryCta.icon === "whatsapp" ? "WhatsApp" : primaryCta.label}
+            </a>
+          )}
+        </nav>
       </header>
 
-      <span id="top" />
-
-      {/* Hero */}
-      <section className={`gb-hero${heroHasImg ? " gb-hero--img" : ""}`} style={heroStyle}>
+      {/* Hero — titular del negocio, no una tarjeta de bio */}
+      <section className={`gb-hero${heroHasImg ? " gb-hero--img" : ""}`}>
+        {heroHasImg && <div className="gb-hero-bg" style={heroStyle} aria-hidden="true" />}
         <div className="gb-hero-inner">
-          <Avatar className="gb-hero-av" />
+          {profile?.avatarUrl && <Avatar className="gb-hero-badge" />}
           <h1 className="gb-name">{brand}</h1>
           {profile?.bio && <p className="gb-bio">{profile.bio}</p>}
-          {family === "minimal" && <Socials />}
+          {(primaryCta || secondaryCta) && (
+            <div className="gb-cta-row">
+              {primaryCta && (
+                <a className="gb-cta gb-cta--primary" href={primaryCta.href} {...ctaTarget(primaryCta.href)}>
+                  <Icon name={primaryCta.icon} />
+                  <span>{primaryCta.label}</span>
+                </a>
+              )}
+              {secondaryCta && (
+                <a className="gb-cta gb-cta--ghost" href={secondaryCta.href}>
+                  <span>{secondaryCta.label}</span>
+                </a>
+              )}
+            </div>
+          )}
+          <Socials />
         </div>
       </section>
 
       <main className="gb-main">
-        {/* Enlaces */}
-        {links.length > 0 && (
-          <section id="enlaces" className="gb-section">
-            <div className="gb-wrap">
-              {family !== "minimal" && socials.length > 0 && (
-                <div style={{ display: "flex", justifyContent: family === "vibrant" || family === "classic" || family === "mindfull" || family === "nature" ? "center" : "flex-start", marginBottom: 24 }}>
-                  <Socials />
-                </div>
-              )}
-              <div className="gb-links">
-                {links.map((btn, i) => (
-                  <a
-                    key={btn.id}
-                    className={`gb-link${i === 0 ? " gb-link--primary" : ""}`}
-                    href={btn.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={btn.color && i !== 0 ? { background: btn.color, color: readableOn(parseColor(btn.color)), borderColor: "transparent" } : undefined}
-                  >
-                    <span>{btn.label}</span>
-                    <span className="gb-link-arrow" aria-hidden="true">↗</span>
-                  </a>
-                ))}
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* Si no hay enlaces pero sí redes, mostramos redes solas */}
-        {links.length === 0 && socials.length > 0 && family !== "minimal" && (
-          <section className="gb-section">
-            <div className="gb-wrap" style={{ display: "flex", justifyContent: "center" }}>
-              <Socials />
-            </div>
-          </section>
-        )}
-
         {/* Servicios */}
         {hasServices && (
-          <section id="servicios" className="gb-section">
+          <section id="servicios" className="gb-section gb-section--services">
             <div className="gb-wrap">
-              <h2 className="gb-h2">{services!.heading ?? "Servicios"}</h2>
+              <h2 className="gb-h2">{services!.heading ?? "Lo que ofrecemos"}</h2>
               <div className="gb-services">
                 {services!.items!.map((item) => (
                   <article key={item.id} className="gb-card">
@@ -419,45 +422,81 @@ export default async function MicrositePage({ params }: Props) {
           </section>
         )}
 
-        {/* Contacto */}
-        {hasContact && (
-          <section id="contacto" className="gb-section">
+        {/* Acciones / enlaces — en fila, no como lista apilada tipo Linktree */}
+        {links.length > 0 && (
+          <section id="enlaces" className="gb-section gb-section--links">
             <div className="gb-wrap">
-              <h2 className="gb-h2">Contacto</h2>
-              <div className="gb-contact">
-                {contactItems.map((item) => {
-                  const inner = (
-                    <>
-                      <span className="gb-cinfo-ic"><Icon name={item.icon} /></span>
-                      <span>
-                        <span className="gb-clabel">{item.label}</span>
-                        <span className="gb-cval">{item.value}</span>
-                      </span>
-                    </>
-                  );
-                  return item.href ? (
-                    <a key={item.label} className="gb-cinfo" href={item.href} target="_blank" rel="noopener noreferrer">{inner}</a>
-                  ) : (
-                    <div key={item.label} className="gb-cinfo">{inner}</div>
-                  );
-                })}
+              <div className="gb-links">
+                {links.map((btn) => (
+                  <a
+                    key={btn.id}
+                    className="gb-link"
+                    href={btn.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={btn.color ? ({ "--gb-link-c": btn.color } as React.CSSProperties) : undefined}
+                  >
+                    <span>{btn.label}</span>
+                    <span className="gb-link-arrow" aria-hidden="true">↗</span>
+                  </a>
+                ))}
               </div>
+            </div>
+          </section>
+        )}
+
+        {/* Contacto — con mapa embebido y CTA de WhatsApp */}
+        {(hasContact || mapSrc) && (
+          <section id="contacto" className="gb-section gb-section--contact">
+            <div className="gb-wrap gb-contact-wrap">
+              <div className="gb-contact-col">
+                <h2 className="gb-h2">Contáctanos</h2>
+                {hasContact && (
+                  <div className="gb-contact">
+                    {contactItems.map((item) => {
+                      const inner = (
+                        <>
+                          <span className="gb-cinfo-ic"><Icon name={item.icon} /></span>
+                          <span>
+                            <span className="gb-clabel">{item.label}</span>
+                            <span className="gb-cval">{item.value}</span>
+                          </span>
+                        </>
+                      );
+                      return item.href ? (
+                        <a key={item.label} className="gb-cinfo" href={item.href} target="_blank" rel="noopener noreferrer">{inner}</a>
+                      ) : (
+                        <div key={item.label} className="gb-cinfo">{inner}</div>
+                      );
+                    })}
+                  </div>
+                )}
+                {waDigits && (
+                  <a className="gb-cta gb-cta--primary gb-cta--wide" href={`https://wa.me/${waDigits}`} target="_blank" rel="noopener noreferrer">
+                    <Icon name="whatsapp" />
+                    <span>Escríbenos por WhatsApp</span>
+                  </a>
+                )}
+              </div>
+              {mapSrc && (
+                <div className="gb-map">
+                  <iframe title={`Mapa de ${brand}`} src={mapSrc} loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
+                </div>
+              )}
             </div>
           </section>
         )}
       </main>
 
       <footer className="gb-footer">
-        <a className="gb-brand" href="#top">
+        <span className="gb-brand">
           <span className="gb-brand-mark">{initial}</span>
           {brand}
-        </a>
+        </span>
         {showBranding && (
-          <div>
-            <a className="gb-powered" href="https://guibay.com" target="_blank" rel="noopener noreferrer">
-              hecho con <strong>Guibay</strong>
-            </a>
-          </div>
+          <a className="gb-powered" href="https://guibay.com" target="_blank" rel="noopener noreferrer">
+            hecho con <strong>Guibay</strong>
+          </a>
         )}
       </footer>
     </div>
